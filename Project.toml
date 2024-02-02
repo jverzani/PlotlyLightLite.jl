@@ -3,7 +3,13 @@ uuid = "b323ca16-7103-4e40-9e60-7dc7d60a998a"
 authors = ["jverzani <jverzani@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+PlotUtils = "995b91a9-d308-5afd-9ec6-746e21dbc043"
+PlotlyLight = "ca7969ec-10b3-423e-8d99-40f33abb42bf"
+
 [compat]
+PlotUtils = "1"
+PlotlyLight = "0.7"
 julia = "1"
 
 [extras]
