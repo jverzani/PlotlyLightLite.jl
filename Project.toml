@@ -10,7 +10,7 @@ PlotlyLight = "ca7969ec-10b3-423e-8d99-40f33abb42bf"
 [compat]
 PlotUtils = "1"
 PlotlyLight = "0.7"
-julia = "1"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
