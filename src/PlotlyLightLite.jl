@@ -15,4 +15,6 @@ export xlabel!, ylabel!, xlims!, ylims!, xaxis!, yaxis!
 export rect!, circle!, hline!, vline!
 export gcf
 
+export unzip
+
 end

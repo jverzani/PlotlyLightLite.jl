@@ -55,16 +55,17 @@ end
 
 """
     plot(x, y, [z]; [linecolor], [linewidth], [legend], kwargs...)
-    plot(f::Function, a, b; kwargs...)
+    plot(f::Function, a, [b]; kwargs...)
 
 Create a line plot.
 
 Returns a `Plot` instance from [PlotlyLight](https://github.com/JuliaComputing/PlotlyLight.jl)
 
-* x,y points to plot. NaN values in `y` break the line
-* linecolor: color of line
-* linewidth: width of line
-* label
+* `x`,`y` points to plot. NaN values in `y` break the line
+* `a`, `b`: the interval to plot a function over can be given by two numbers or if just `a` then by `extrema(a)`.
+* `linecolor`: color of line
+* `linewidth`: width of line
+* `label` in legend
 
 Other keyword arguments include `width` and `height`, `xlims` and `ylims`, `legend`, `aspect_ratio`.
 
@@ -108,12 +109,15 @@ function plot(f::Function, a::Real, b::Real;
     p
 end
 
+# ab is some interval specification via `extrema`
+plot(f::Function, ab; kwargs...) = plot(f, extrema(ab)...; kwargs...)
 
 """
     plot!([p::Plot], x, y; kwargs...)
+    plot!([p::Plot], f, a, [b]; kwargs...)
     plot!([p::Plot], f; kwargs...)
 
-Used to add a new tract to an existing plot. Like `Plots.plot!`
+Used to add a new tract to an existing plot. Like `Plots.plot!`. See [`plot`](@ref) for argument details.
 """
 function plot!(p::Plot, x, y;
                label = nothing,
@@ -166,6 +170,8 @@ function plot!(p::Plot, f::Function, a, b; kwargs...)
     plot!(p, x, y; kwargs...)
 end
 
+plot!(p::Plot, f::Function, ab; kwargs...) =
+    plot!(p, f, extrema(ab)...; kwargs...)
 
 function plot!(p::Plot, f::Function; kwargs...)
     m, M = extrema(p).x
@@ -231,6 +237,18 @@ end
 
 ## ----- 2-3 d plots
 
+"""
+    countour(x, y, z; kwargs...)
+    contour!([p::Plot], x, y, z; kwargs...)
+    contour(x, y, f::Function; kwargs...)
+
+Create contour function of `f`
+"""
+function contour(x, y, z; kwargs...)
+    p = _new_plot(; kwargs...)
+    contour!(p, x, y, z; kwargs...)
+end
+
 function contour(x, y, f::Function; kwargs...)
     p = _new_plot(; kwargs...)
     contour!(p, x,y, f.(x', y); kwargs...)
@@ -253,6 +271,13 @@ function contour!(p::Plot, x, y, z;
     p
 end
 
+"""
+    surface(x, y, z; kwargs...)
+    surface!(x, y, z; kwargs...)
+    surface(x, y, f::Function; kwargs...)
+
+Create surface plot.
+"""
 function surface(x, y, f::Function; kwargs...)
     p = _new_plot(; kwargs...)
     surface!(p, x, y, f.(x', y); kwargs...)
