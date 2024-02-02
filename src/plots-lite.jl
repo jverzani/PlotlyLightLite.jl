@@ -293,7 +293,7 @@ end
 
 
 """
-    countour(x, y, z; kwargs...)
+    contour(x, y, z; kwargs...)
     contour!([p::Plot], x, y, z; kwargs...)
     contour(x, y, f::Function; kwargs...)
     contour!(x, y, f::Function; kwargs...)
@@ -319,25 +319,62 @@ function contour!(p::Plot, x, y, z;
                   kwargs...)
 
     c = Config(;x,y,z,type="contour")
+    _merge!(c; kwargs...)
+
     !isnothing(colorscale) && (c.colorscale=colorscale)
     if !isnothing(contours) # something with a step
         l,r = extrema(contours); s = step(contours)
         c.contours.start = l
-        c.controus.size  = s
+        c.contours.size  = s
         c.contours."end" = r
     end
+
 
     push!(p.data, c)
     p
 end
 
+##
+
+"""
+    heatmap(x, y, z; kwargs...)
+    heatmap!([p::Plot], x, y, z; kwargs...)
+    heatmap(x, y, f::Function; kwargs...)
+    heatmap!(x, y, f::Function; kwargs...)
+
+Create heatmap function of `f`
+"""
+function heatmap(x, y, z; kwargs...)
+    p = _new_plot(; kwargs...)
+    heatmap!(p, x, y, z; kwargs...)
+end
+
+heatmap(x, y, f::Function; kwargs...) =
+    heatmap(x,y, f.(x', y); kwargs...)
+
+heatmap!(x, y, z; kwargs...) =
+    heatmap!(current_plot[], x, y, z; kwargs...)
+heatmap!(x, y, f::Function; kwargs...) =
+    heatmap!(current_plot[], x, y, f.(x', y); kwargs...)
+
+function heatmap!(p::Plot, x, y, z;
+                  kwargs...)
+
+    c = Config(; x, y, z, type="heatmap")
+    _merge!(c; kwargs...)
+
+    push!(p.data, c)
+    p
+end
+
+##
 """
     surface(x, y, z; kwargs...)
     surface!(x, y, z; kwargs...)
     surface(x, y, f::Function; kwargs...)
     surface!(x, y, f::Function; kwargs...)
 
-Create surface plot.
+Create surface plot. Pass `zcontour=true` to add contour plot projected onto the `z` axis.
 """
 function surface(x, y, z; kwargs...)
     p = _new_plot(; kwargs...)
@@ -357,9 +394,16 @@ function surface!(p::Plot, x, y, z;
                   eye = nothing, # (x=1.35, y=1.35, z=..)
                   center = nothing,
                   up = nothing,
+                  zcontour = false,
                   kwargs...)
     c = Config(;x,y,z,type="surface")
+    _merge!(c; kwargs...)
+
     # configuration options? colors?
+    if zcontour
+        c.contours.z = Config(show=true, usecolormap=true,
+                              project=Config(;z=true))
+    end
 
     # camera controls
     _camera_position!(p.layout.scene.camera; center, up, eye)
