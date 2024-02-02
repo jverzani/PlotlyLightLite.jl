@@ -1,0 +1,13 @@
+name = "PlotlyLightLite"
+uuid = "b323ca16-7103-4e40-9e60-7dc7d60a998a"
+authors = ["jverzani <jverzani@gmail.com> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
