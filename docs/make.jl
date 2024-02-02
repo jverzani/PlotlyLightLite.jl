@@ -11,6 +11,7 @@ makedocs(
                            canonical="https://jverzani.github.io/PlotlyLightLite.jl",
                            edit_link="main",
                            assets=String[],
+                           size_threshold_ignore = ["index.md"],
                            ),
 
     pages=[
@@ -24,5 +25,5 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo = "github.com/jverzani/PlotlyLightLite.jl.git"
+    repo = "github.com/jverzani/PlotlyLightLite.jl.git",
 )

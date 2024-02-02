@@ -8,6 +8,8 @@ include("utils.jl")
 include("plot-utils.jl")
 include("plots-lite.jl")
 
+export Plot
+
 export plot, plot!, scatter, scatter!,  contour, contour!, surface, surface!, quiver, quiver!
 export grid_layout
 export annotate, annotate!, title!, size!, legend!

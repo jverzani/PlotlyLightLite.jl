@@ -2,7 +2,11 @@
     unzip(v, [vs...])
     unzip(f::Function, a, b)
 
-Take container of points, return vector of corrodinated. Reverse of `zip`. Function version applies `f` to a range of points over `(a,b)` and then calls `unzip`.
+Take container of points, return vector of corrodinated. Reverse of `zip`. Uses code from the `invert` function of `SplitApplyCombine`.
+
+The function version applies `f` to a range of points over `(a,b)` and then calls `unzip`. This uses the `adapted_grid` function from `PlotUtils`.
+
+This uses
 """
 unzip(vs) = invert(vs) # use SplitApplyCombine.invert (copied below)
 #unzip(v,vs...) = unzip([v, vs...])

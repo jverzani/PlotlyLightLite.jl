@@ -4,7 +4,7 @@ export grid_layout
 export annotate, annotate!, title!, size!, legend!
 export xlabel!, ylabel!, xlims!, ylims!, xaxis!, yaxis!
 export rect!, circle!, hline!, vline!
-export gcf
+export current
 export plotif
 
 ## create a simplish 2D Plots.plot like interface for PlotlyLight.Plot
@@ -14,13 +14,14 @@ const current_plot = Ref{Plot}() # store current plot
 const first_plot = Ref{Bool}(true) # for first plot warning
 
 """
-    gcf()
+    current()
 
-Get current figure. A `Plot` object of `PlotlyLight`. Not typically needed,
-as it is implicit in most mutating calls, though may be convenient if those happen within a loop.
+Get current figure. A `Plot` object of `PlotlyLight`; `UndefRefError` if none.
+
+Not typically needed, as it is implicit in most mutating calls, though may be convenient if those happen within a loop.
 
 """
-gcf() = current_plot[]           # get current figure
+current() = current_plot[]
 
 # make a new plot by calling `PlotlyLight.Plot`
 function _new_plot(;
@@ -182,6 +183,17 @@ end
 plot!(x, y; kwargs...) =  plot!(current_plot[], x, y; kwargs...)
 plot!(f::Function, args...; kwargs...) =  plot!(current_plot[], f, args...; kwargs...)
 
+# convenience to make multiple plots by passing in vector
+# using plot! allows line customizations...
+function plot(fs::Vector{Function}, a, b; kwargs...)
+    u, vs... = fs
+    p = plot(u, a, b; kwargs...)
+    for v ∈ vs
+        plot!(p, v, a, b)
+    end
+    p
+end
+
 """
     scatter(x, y, [z]; [markershape], [markercolor], [markersize], kwargs...)
     scatter!([p::Plot], x, y, [z]; kwargs...)
@@ -238,9 +250,53 @@ end
 ## ----- 2-3 d plots
 
 """
+    plot((f,g), a, b; kwargs...)
+    plot!([p::PLot], (f,g), a, b; kwargs...)
+
+Make parametric plot from tuple of functions, `f` and `g`.
+"""
+function plot(uv::Tuple{Function, Function}, a, b=nothing; kwargs...)
+    p = _new_plot(; kwargs...)
+    plot!(p, uv, a, b, kwargs...)
+end
+
+plot!(uv::Tuple{Function, Function}, a, b=nothing; kwargs...) =
+    plot!(current_plot[], us, a, b; kwargs...)
+
+function plot!(p::Plot, uv::Tuple{Function, Function}, a, b=nothing; kwargs...)
+    isnothing(b) && (a, b = extrema(a))
+    # which points to use?
+    t = range(a, b, length=251)
+    u, v = uv
+    x, y = u.(t), v.(t)
+    plot!(p, x, y; kwargs...)
+end
+
+# 3d case
+function plot(uv::Tuple{Function, Function, Function}, a, b=nothing; kwargs...)
+    p = _new_plot(; kwargs...)
+    plot!(p, uv, a, b, kwargs...)
+end
+
+plot!(uv::Tuple{Function, Function, Function}, a, b=nothing; kwargs...) =
+    plot!(current_plot[], us, a, b; kwargs...)
+
+function plot!(p::Plot, uv::Tuple{Function, Function, Function}, a, b=nothing; kwargs...)
+    isnothing(b) && (a, b = extrema(a))
+    # which points to use?
+    t = range(a, b, length=251)
+    u, v, w = uv
+    x, y, z = u.(t), v.(t), w.(t)
+    plot!(p, x, y, z; kwargs...)
+end
+
+
+
+"""
     countour(x, y, z; kwargs...)
     contour!([p::Plot], x, y, z; kwargs...)
     contour(x, y, f::Function; kwargs...)
+    contour!(x, y, f::Function; kwargs...)
 
 Create contour function of `f`
 """
@@ -249,15 +305,19 @@ function contour(x, y, z; kwargs...)
     contour!(p, x, y, z; kwargs...)
 end
 
-function contour(x, y, f::Function; kwargs...)
-    p = _new_plot(; kwargs...)
-    contour!(p, x,y, f.(x', y); kwargs...)
-end
+contour(x, y, f::Function; kwargs...) =
+    contour(x,y, f.(x', y); kwargs...)
+
+contour!(x, y, z; kwargs...) =
+    contour!(current_plot[], x, y, z; kwargs...)
+contour!(x, y, f::Function; kwargs...) =
+    contour!(current_plot[], x, y, f.(x', y); kwargs...)
 
 function contour!(p::Plot, x, y, z;
                   colorscale = nothing,
                   contours = nothing,
                   kwargs...)
+
     c = Config(;x,y,z,type="contour")
     !isnothing(colorscale) && (c.colorscale=colorscale)
     if !isnothing(contours) # something with a step
@@ -275,19 +335,23 @@ end
     surface(x, y, z; kwargs...)
     surface!(x, y, z; kwargs...)
     surface(x, y, f::Function; kwargs...)
+    surface!(x, y, f::Function; kwargs...)
 
 Create surface plot.
 """
-function surface(x, y, f::Function; kwargs...)
-    p = _new_plot(; kwargs...)
-    surface!(p, x, y, f.(x', y); kwargs...)
-end
-
 function surface(x, y, z; kwargs...)
     p = _new_plot(; kwargs...)
     surface!(p, x, y, z; kwargs...)
 end
 
+surface(x, y, f::Function; kwargs...) =
+    surface(x, y, f.(x', y); kwargs...)
+
+surface!(x, y, z; kwargs...) =
+    surface!(current_plot[], x, y, z; kwargs...)
+
+surface!(x, y, f::Function; kwargs...) =
+    surface!(current_plot[], x, y, f.(x', y); kwargs...)
 
 function surface!(p::Plot, x, y, z;
                   eye = nothing, # (x=1.35, y=1.35, z=..)
