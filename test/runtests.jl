@@ -19,6 +19,15 @@ using Test
     annotate!(p, ((3/2, 1/2, "A"),), pointsize=20)
 
     @test isa(p, Plot)
+
+    xs = ys = range(0, 5, length=6)
+    f(x,y) = sin(x)*sin(y)
+    contour(xs, ys, f)
+    heatmap(xs, ys, f)
+    surface(xs, ys, f)
+    r(x,y) = (x, x*y, y)
+    surface(unzip(xs, ys, r)...)
+
     nothing
 
 end

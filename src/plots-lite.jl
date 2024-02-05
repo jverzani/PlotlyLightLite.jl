@@ -52,7 +52,7 @@ end
 
 
 ## ----
-## plot has many different interfaces for dispath
+## plot has many different interfaces for dispatch
 """
     plot(x, y, [z]; [linecolor], [linewidth], [legend], kwargs...)
     plot(f::Function, a, [b]; kwargs...)
@@ -425,7 +425,8 @@ surface!(xs, ys, map(x -> x .- 1, z1), colorscale="Viridis", showscale=false, op
 `Julia` users would typically use a matrix to hold the `z` data, but Javascript users would expect a vector of vectors, as above. As `PlotlyLight` just passes on the data to Javascript, the above is perfectly acceptable.
 (The keyword arguments above come from `Plotly`, not `Plots`.)
 
-A torus
+A parameterized surface can be displayed. Below the `unzip` function returns 3 matrices specifying the surface described by the vector-valued function `r`.
+
 ```
 r1, r2 = 2, 1/2
 r(u,v) = ((r1 + r2*cos(v))*cos(u), (r1 + r2*cos(v))*sin(u), r2*sin(v))

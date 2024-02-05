@@ -108,7 +108,7 @@ to_documenter(current())           # hide
 ```
 
 
-Contour and surface plots can be produced by `contour` and `surface`. This example uses the [`peaks`](https://www.mathworks.com/help/matlab/ref/peaks.html) function of MATLAB:
+Contour, heatmaps, and surface plots can be produced by `contour`, heatmap, and `surface`. This example uses the [`peaks`](https://www.mathworks.com/help/matlab/ref/peaks.html) function of MATLAB:
 
 ```@example lite
 function peaks(x,y)
@@ -132,6 +132,16 @@ delete!(current().layout, :width)  # hide
 delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
+
+Parametric surfaces can be produced as follows, where `unzip` creates 3 matrices to pass to `surface`:
+
+```@example lite
+r1, r2 = 2, 1/2
+r(u,v) = ((r1 + r2*cos(v))*cos(u), (r1 + r2*cos(v))*sin(u), r2*sin(v))
+us = vs = range(0, 2pi, length=25)
+surface(unzip(us, vs, r)...)
+```
+
 
 !!! note "FIXME"
     The above surface and contour graphics aren't rendering properly in the documentation.
@@ -189,7 +199,7 @@ Some exported names are used to adjust a plot after construction:
 * `title!`, `xlabel!`, `ylabel!`: to adjust title; ``x``-axis label; ``y``-axis label
 * `xlims!`, `ylims!`: to adjust limits of viewing window
 * `xaxis!`, `yaxis!`: to adjust the axis properties
-* `grid_layout` to specify a cell-like layout using a matrix of plots.
+* `plot` to specify a cell-like layout using a matrix of plots.
 
 !!! note "Subject to change"
     There are some names for keyword arguments that should be changed.

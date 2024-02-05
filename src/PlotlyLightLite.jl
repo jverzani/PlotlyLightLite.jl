@@ -57,18 +57,18 @@ module PlotlyLightLite
 
 import PlotlyLight
 import PlotlyLight: Plot, Config
+
 using PlotUtils
 
 
 include("utils.jl")
-include("plot-utils.jl")
 include("plots-lite.jl")
 
 export Plot, Config # but not Preset, preset, plot
 
-export plot, plot!, scatter, scatter!,  contour, contour!, surface, surface!, quiver, quiver!
-export grid_layout
-export annotate, annotate!, title!, size!, legend!
+export plot, plot!, scatter, scatter!
+export contour, contour!, heatmap, heatmap!, surface, surface!
+export quiver, quiver!, annotate, annotate!, title!, size!, legend!
 export xlabel!, ylabel!, xlims!, ylims!, xaxis!, yaxis!
 export rect!, circle!, hline!, vline!
 export gcf
