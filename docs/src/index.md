@@ -140,6 +140,10 @@ r1, r2 = 2, 1/2
 r(u,v) = ((r1 + r2*cos(v))*cos(u), (r1 + r2*cos(v))*sin(u), r2*sin(v))
 us = vs = range(0, 2pi, length=25)
 surface(unzip(us, vs, r)...)
+
+delete!(current().layout, :width)  # hide
+delete!(current().layout, :height) # hide
+to_documenter(current())           # hide
 ```
 
 
