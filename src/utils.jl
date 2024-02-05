@@ -49,3 +49,39 @@ function Base.extrema(p::Plot)
     end
     (x = (mx, Mx), y = (my, My), z = (mz, Mz))
 end
+
+
+include("SplitApplyCombine_invert.jl")
+
+"""
+    unzip(v, [vs...])
+    unzip(f::Function, a, b)
+    unzip(a, b, F::Function)
+
+Reshape data to x,y,[z] mode.
+
+In its basic use, `zip` takes two vectors, pairs them off, and returns an iterator of tuples for each pair. For `unzip` a vector of same-length vectors is "unzipped" to return two (or more) vectors.
+
+The function version applies `f` to a range of points over `(a,b)` and then calls `unzip`. This uses the `adapted_grid` function from `PlotUtils`.
+
+The function version with `F` computes `F(a', b)` and then unzips. This is used with parameterized surface plots
+
+This uses the `invert` function of `SplitApplyCombine`.
+"""
+unzip(vs) = invert(vs) # use SplitApplyCombine.invert (copied below)
+#unzip(v,vs...) = unzip([v, vs...])
+unzip(r::Function, a, b, n) = unzip(r.(range(a, stop=b, length=n)))
+# return (xs, f.(xs)) or (f₁(xs), f₂(xs), ...)
+function unzip(f::Function, a, b)
+    n = length(f(a))
+    if n == 1
+        return PlotUtils.adapted_grid(f, (a,b))
+    else
+        xsys = [PlotUtils.adapted_grid(x->f(x)[i], (a,b)) for i ∈ 1:n]
+        xs = sort(vcat([xsys[i][1] for i ∈ 1:n]...))
+        return unzip(f.(xs))
+    end
+
+end
+# return matrices for x, y, [z]
+unzip(as, bs, F::Function) = unzip(F.(as', bs))

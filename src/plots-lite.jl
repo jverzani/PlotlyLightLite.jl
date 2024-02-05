@@ -1,13 +1,12 @@
 ## --- plotting
-export plot, plot!, scatter, scatter!,  contour, contour!, surface, surface!, quiver, quiver!
+export plot, plot!
+export scatter, scatter!,  contour, contour!, surface, surface!, quiver, quiver!
 export grid_layout
 export annotate, annotate!, title!, size!, legend!
 export xlabel!, ylabel!, xlims!, ylims!, xaxis!, yaxis!
 export rect!, circle!, hline!, vline!
 export current
-export plotif
 
-## create a simplish 2D Plots.plot like interface for PlotlyLight.Plot
 
 ## utils
 const current_plot = Ref{Plot}() # store current plot
@@ -53,7 +52,7 @@ end
 
 
 ## ----
-
+## plot has many different interfaces for dispath
 """
     plot(x, y, [z]; [linecolor], [linewidth], [legend], kwargs...)
     plot(f::Function, a, [b]; kwargs...)
@@ -114,6 +113,21 @@ end
 plot(f::Function, ab; kwargs...) = plot(f, extrema(ab)...; kwargs...)
 
 """
+    plot(; layout::Config?, config::Config?, kwargs...)
+
+Pass keyword arguments through `Config` and onto `PlotlyLight.Plot`.
+"""
+function plot(; layout::Union{Nothing, Config}=nothing,
+              config::Union{Nothing, Config}=nothing,
+              kwargs...)
+    p = _new_plot()
+    push!(p.data, Config())
+    plot!(p; layout, config, kwargs...)
+end
+
+
+
+"""
     plot!([p::Plot], x, y; kwargs...)
     plot!([p::Plot], f, a, [b]; kwargs...)
     plot!([p::Plot], f; kwargs...)
@@ -127,6 +141,17 @@ function plot!(p::Plot, x, y;
     # fussiness to handle NaNs in `y` values
     y′ = [isfinite(yᵢ) ? yᵢ : nothing for yᵢ ∈ y]
     _push_line_trace!(p, x, y′; label, kwargs...)
+    p
+end
+
+# pass through to Javascript; like Plot...
+plot!(; kwargs...) = plot!(current_plot[]; kwargs...)
+function plot!(p::Plot; layout::Union{Nothing, Config}=nothing,
+               config::Union{Nothing, Config}=nothing,
+               kwargs...)
+    !isnothing(layout) && merge!(p.layout, layout)
+    !isnothing(config) && merge!(p.config, config)
+    merge!(p.data[end], Config(kwargs...))
     p
 end
 
@@ -255,7 +280,8 @@ end
 
 Make parametric plot from tuple of functions, `f` and `g`.
 """
-function plot(uv::Tuple{Function, Function}, a, b=nothing; kwargs...)
+function plot(uv::NTuple{N,Function}, a, b=nothing; kwargs...) where {N}
+    2 <= N <= 3 || throw(ArgumentError("2 or 3 functions only"))
     p = _new_plot(; kwargs...)
     plot!(p, uv, a, b, kwargs...)
 end
@@ -263,35 +289,30 @@ end
 plot!(uv::Tuple{Function, Function}, a, b=nothing; kwargs...) =
     plot!(current_plot[], us, a, b; kwargs...)
 
-function plot!(p::Plot, uv::Tuple{Function, Function}, a, b=nothing; kwargs...)
-    isnothing(b) && (a, b = extrema(a))
+function plot!(p::Plot, uv::NTuple{N,Function}, a, b=nothing; kwargs...) where {N}
+    2 <= N <= 3 || throw(ArgumentError("2 or 3 functions only"))
+
     # which points to use?
-    t = range(a, b, length=251)
-    u, v = uv
-    x, y = u.(t), v.(t)
-    plot!(p, x, y; kwargs...)
+    if isnothing(b)
+        t = range(extrema(a)...; length=251)
+    else
+        t = range(a, b; length=251)
+    end
+
+    plot!(p, (fᵢ.(t) for fᵢ ∈ uv)...; kwargs...)
 end
 
-# 3d case
-function plot(uv::Tuple{Function, Function, Function}, a, b=nothing; kwargs...)
-    p = _new_plot(; kwargs...)
-    plot!(p, uv, a, b, kwargs...)
-end
-
-plot!(uv::Tuple{Function, Function, Function}, a, b=nothing; kwargs...) =
-    plot!(current_plot[], us, a, b; kwargs...)
-
-function plot!(p::Plot, uv::Tuple{Function, Function, Function}, a, b=nothing; kwargs...)
-    isnothing(b) && (a, b = extrema(a))
-    # which points to use?
-    t = range(a, b, length=251)
-    u, v, w = uv
-    x, y, z = u.(t), v.(t), w.(t)
-    plot!(p, x, y, z; kwargs...)
+# layout
+# plots has plot(p1,p2, ...; layout=(m,n))
+# makie has [p1 p2; ...] display layout
+# this is in between
+function plot(ps::Array{<:Plot, N}; kwargs...) where {N}
+    1 <= N <= 2 || throw(ArgumentError("1 or 2 dimensional arrays only"))
+    grid_layout(ps; kwargs...)
 end
 
 
-
+# special cases of plots
 """
     contour(x, y, z; kwargs...)
     contour!([p::Plot], x, y, z; kwargs...)
@@ -375,6 +396,46 @@ end
     surface!(x, y, f::Function; kwargs...)
 
 Create surface plot. Pass `zcontour=true` to add contour plot projected onto the `z` axis.
+
+# Example
+
+From https://discourse.julialang.org/t/3d-surfaces-time-slider/109673
+```
+z1 = Vector[[8.83, 8.89, 8.81, 8.87, 8.9, 8.87],
+                       [8.89, 8.94, 8.85, 8.94, 8.96, 8.92],
+                       [8.84, 8.9, 8.82, 8.92, 8.93, 8.91],
+                       [8.79, 8.85, 8.79, 8.9, 8.94, 8.92],
+                       [8.79, 8.88, 8.81, 8.9, 8.95, 8.92],
+                       [8.8, 8.82, 8.78, 8.91, 8.94, 8.92],
+                       [8.75, 8.78, 8.77, 8.91, 8.95, 8.92],
+                       [8.8, 8.8, 8.77, 8.91, 8.95, 8.94],
+                       [8.74, 8.81, 8.76, 8.93, 8.98, 8.99],
+                       [8.89, 8.99, 8.92, 9.1, 9.13, 9.11],
+                       [8.97, 8.97, 8.91, 9.09, 9.11, 9.11],
+                       [9.04, 9.08, 9.05, 9.25, 9.28, 9.27],
+                       [9, 9.01, 9, 9.2, 9.23, 9.2],
+                       [8.99, 8.99, 8.98, 9.18, 9.2, 9.19],
+                       [8.93, 8.97, 8.97, 9.18, 9.2, 9.18]]
+xs , ys = 1:length(z1[1]), 1:length(z1) # needed here given interface chosen
+surface(xs, ys, z1, colorscale="Viridis")
+surface!(xs, ys, map(x -> x .+ 1, z1), colorscale="Viridis", showscale=false, opacity=0.9)
+surface!(xs, ys, map(x -> x .- 1, z1), colorscale="Viridis", showscale=false, opacity=0.9)
+```
+
+`Julia` users would typically use a matrix to hold the `z` data, but Javascript users would expect a vector of vectors, as above. As `PlotlyLight` just passes on the data to Javascript, the above is perfectly acceptable.
+(The keyword arguments above come from `Plotly`, not `Plots`.)
+
+A torus
+```
+r1, r2 = 2, 1/2
+r(u,v) = ((r1 + r2*cos(v))*cos(u), (r1 + r2*cos(v))*sin(u), r2*sin(v))
+us = vs = range(0, 2pi, length=25)
+xs, ys, zs = unzip(us, vs, r)
+
+surface(xs, ys, zs)
+```
+
+
 """
 function surface(x, y, z; kwargs...)
     p = _new_plot(; kwargs...)
@@ -396,6 +457,7 @@ function surface!(p::Plot, x, y, z;
                   up = nothing,
                   zcontour = false,
                   kwargs...)
+
     c = Config(;x,y,z,type="surface")
     _merge!(c; kwargs...)
 
