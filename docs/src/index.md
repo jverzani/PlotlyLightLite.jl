@@ -112,25 +112,17 @@ Contour, heatmaps, and surface plots can be produced by `contour`, heatmap, and 
 
 ```@example lite
 function peaks(x,y)
-	z = 3*(1-x)^2* exp(-(x.^2) - (y+1)^2)
-	z = z - 10*(x/5 - x^3 - y^5) * exp(-x^2-y^2)
-    z = z - 1/3*exp(-(x+1)^2 - y^2)
+    z = 3 * (1-x)^2 * exp(-(x^2) - (y+1)^2)
+    z = z - 10 * (x/5 - x^3 - y^5) * exp(-x^2-y^2)
+    z = z - 1/3 * exp(-(x+1)^2 - y^2)
 end
 xs = range(-3, 3, length=100)
 ys = range(-2, 2, length=100)
 contour(xs, ys, peaks)
-
-delete!(current().layout, :width)  # hide
-delete!(current().layout, :height) # hide
-to_documenter(current())           # hide
 ```
 
 ```@example lite
 surface(xs, ys, peaks)
-
-delete!(current().layout, :width)  # hide
-delete!(current().layout, :height) # hide
-to_documenter(current())           # hide
 ```
 
 Parametric surfaces can be produced as follows, where `unzip` creates 3 matrices to pass to `surface`:
@@ -140,15 +132,11 @@ r1, r2 = 2, 1/2
 r(u,v) = ((r1 + r2*cos(v))*cos(u), (r1 + r2*cos(v))*sin(u), r2*sin(v))
 us = vs = range(0, 2pi, length=25)
 surface(unzip(us, vs, r)...)
-
-delete!(current().layout, :width)  # hide
-delete!(current().layout, :height) # hide
-to_documenter(current())           # hide
 ```
 
 
 !!! note "FIXME"
-    The above surface and contour graphics aren't rendering properly in the documentation.
+    The above surface and contour graphics aren't rendering properly in the documentation so aren't show to avoid confusing
 
 ### keyword arguments
 
