@@ -136,9 +136,9 @@ surface(unzip(us, vs, r)...)
 
 
 !!! note "FIXME"
-    The above surface and contour graphics aren't rendering properly in the documentation so aren't show to avoid confusing
+    The above surface and contour graphics aren't rendering properly in the documentation so aren't shown to avoid confusing
 
-### keyword arguments
+### Keyword arguments
 
 The are several keyword arguments used to adjust the defaults for the graphic, for example, `legend=false` and `markersize=10`. Some keyword names utilize `Plots.jl` naming conventions and are translated back to their `Plotly` counterparts. Additional keywords are passed as is so should use the `Plotly` names.
 
@@ -170,6 +170,8 @@ As seen in the example there are *many* ways to specify a color. These can be by
 
 One of the `rect!` calls has a `line=(color="black",)` specification. This is a keyword argument from `Plotly`. Shapes have an interior and exterior boundary. The `line` attribute is used to pass in attributes, in this case the line color is black. A *named tuple* is used (which is why the trailing comma is needed for this single element tuple).
 
+### Other methods
+
 As seen in this overblown example, there are other methods to plot different things. These include:
 
 * `scatter!` is used to plot points
@@ -179,6 +181,8 @@ As seen in this overblown example, there are other methods to plot different thi
 * `quiver!` is used to add arrows to a plot. These can optionally have their tails labeled, so this method can be repurposed to add annotations.
 
 * `contour` is used to create contour plots
+
+* `heatmap` is used to create heatmpa plots
 
 * `surface` is used to plot ``3``-dimensional surfaces.
 

@@ -5,7 +5,7 @@
 
 * positional arguments for data
 * keyword arguments for attributes
-* `plot()` is a workhorse with `seriestype` indicating which plot; there are alos special methods (e.g. `scatter(x,y) --> plot(x,y; seriestype="scatter")`)
+* `plot()` is a workhorse with `seriestype` indicating which plot; there are alos special methods (e.g. `scatter(x,y)` becomes `plot(x,y; seriestype="scatter")`)
 
 # `PlotlyLight.jl` uses
 
@@ -21,7 +21,7 @@
 
 ```
 plot(; layout::Config?, config::Config, kwargs...)
-plot!([p::Plot]; layout::Config?, config::Config, kwargs...)
+plot!([p::Plot]; layout::Config?, config::Config?, kwargs...)
 ```
 
 * Line plot. connecting `x`,`y` (and possibly `z`). For 2D, use `!isfinite` values in `y` to break.
@@ -34,8 +34,8 @@ plot!([p::Plot], x, y, [z]; kwargs...
 * Data can be generated from a function:
 
 ```
-plot(f::Function, ab; kwargs...) -- plot(unzip(f, ab)...; kwargs...)
-plot(f::Function, a, b; kwargs...) -- plot(unzip(f, a, b)...; kwargs...)
+plot(f::Function, ab; kwargs...) => plot(unzip(f, ab)...; kwargs...)
+plot(f::Function, a, b; kwargs...) => plot(unzip(f, a, b)...; kwargs...)
 plot!([p::Plot], f, ab, [b])
 ```
 
@@ -43,11 +43,11 @@ plot!([p::Plot], f, ab, [b])
 
 ```
 plot(fs::Vector{Function}, a, [b]; kwargs...)
-plot!(fs::Vector{Function}, a, [b]; kwargs...)
+plot!([p::Plot], fs::Vector{Function}, a, [b]; kwargs...)
 ```
 
 !!! note
-    currently x,y make vector; should matrices be supported using column vectors? "In Plots.jl, every column is a series, a set of related points which form lines, surfaces, or other plotting primitives. "
+    Currently `x`, `y` make vectors; should matrices be supported using column vectors? "In Plots.jl, every column is a series, a set of related points which form lines, surfaces, or other plotting primitives. "
 
 * Parametric line plots, 2 or 3d
 
