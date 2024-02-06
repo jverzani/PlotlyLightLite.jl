@@ -706,7 +706,9 @@ function arrow!(p::Plot, ::Val{2}, tails, vs; kwargs...)
     p
 end
 
-function arrow!(p::Plot, ::Val{3}, tails, vs; showscale=false, kwargs...)
+# λ may change!
+# too fiddly
+function arrow!(p::Plot, ::Val{3}, tails, vs; λ = 0.1, showscale=false, kwargs...)
     _norm(x) = sqrt(sum(xᵢ*xᵢ for xᵢ ∈ x))
 
     tips = map(.+, tails, vs)
@@ -724,9 +726,13 @@ function arrow!(p::Plot, ::Val{3}, tails, vs; showscale=false, kwargs...)
 
     # adjust length of cone. This is fiddly
     # https://plotly.com/python-api-reference/generated/plotly.graph_objects.Cone.html
-    λ = 0.1 # xxx make adjustable
+
+
+    # not sure this is better than unit vectors...
     M = maximum(_norm.(vs))
-    u,v,w = du ./ M, dv ./ M, dw ./ M
+    u, v, w = du ./ M, dv ./ M, dw ./ M
+    #u,v,w = du, dv, dw
+    λ *= log10(10 + length(x))
 
     d2 = Config(;type="cone",
                 x,y,z,
