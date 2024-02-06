@@ -80,7 +80,8 @@ export Plot, Config # but not Preset, preset, plot
 
 export plot, plot!, scatter, scatter!
 export contour, contour!, heatmap, heatmap!, surface, surface!
-export quiver, quiver!, annotate, annotate!, title!, size!, legend!
+export quiver, quiver!, arrow, arrow!
+export annotate, annotate!, title!, size!, legend!
 export xlabel!, ylabel!, xlims!, ylims!, xaxis!, yaxis!
 export rect!, circle!, hline!, vline!
 export gcf

@@ -29,7 +29,7 @@ function _new_plot(;
                    legend = nothing,
                    aspect_ratio=nothing,
                    kwargs...)
-    p = Plot(Config[], # data
+    p = Plot(Config[],
              Config(), # layout
              Config(responsive=true) ) # config
     current_plot[] = p
@@ -119,9 +119,12 @@ Pass keyword arguments through `Config` and onto `PlotlyLight.Plot`.
 """
 function plot(; layout::Union{Nothing, Config}=nothing,
               config::Union{Nothing, Config}=nothing,
+              width=800, height=600,
+              xlims=nothing, ylims=nothing,
+              legend=nothing,
+              aspect_ratio = nothing,
               kwargs...)
-    p = _new_plot()
-    push!(p.data, Config())
+    p = _new_plot(;width, height,xlims, ylims, legend, aspect_ratio)
     plot!(p; layout, config, kwargs...)
 end
 
@@ -151,7 +154,8 @@ function plot!(p::Plot; layout::Union{Nothing, Config}=nothing,
                kwargs...)
     !isnothing(layout) && merge!(p.layout, layout)
     !isnothing(config) && merge!(p.config, config)
-    merge!(p.data[end], Config(kwargs...))
+    d = Config(kwargs...)
+    !isempty(d) && push!(p.data, d)
     p
 end
 
@@ -572,8 +576,10 @@ function annotate!(p::Plot, x, y, txt;
 end
 
 annotate!(p::Plot, anns::Tuple; kwargs...) = annotate!(p, unzip(anns)...; kwargs...)
+annotate!(p::Plot, anns::Vector; kwargs...) = annotate!(p, unzip(anns)...; kwargs...)
 annotate!(x, y, txt; kwargs...) = annotate!(current_plot[], x, y, txt; kwargs...)
 annotate!(anns::Tuple; kwargs...) = annotate!(current_plot[], anns; kwargs...)
+annotate!(anns::Vector; kwargs...) = annotate!(current_plot[], anns; kwargs...)
 
 # arrow from u to u + du with optional text at tail
 function _arrow(u,du,txt=nothing;
@@ -598,6 +604,8 @@ end
 """
     quiver!([p::Plot], x, y, txt=nothing; quiver=(dx, dy), kwargs...)
     quiver(x, y, txt=nothing; quiver=(dx, dy), kwargs...)
+
+Draw 2d arrows. See `arrow!` for a single arrow.
 
 * `(x,y)` are tail positions, optionally labeled by `txt`
 * `quiver` specifies vector part of arrow
@@ -631,6 +639,12 @@ end
 xaxis!(zeroline=false); yaxis!(zeroline=false) # remove zerolines
 p
 ```
+
+!!! note "3d arrows"
+    3d arrows are possible using `arrows!`.
+
+
+
 """
 function quiver!(p::Plot, x, y, txt=nothing; quiver=nothing, kwargs...)
     us = zip(x,y)
@@ -649,6 +663,83 @@ function quiver(as...; kwargs...)
     p = _new_plot(; kwargs...)
     quiver!(p, as...; kwargs...)
 end
+
+# quiver works on vectors x,y,z,u,v,w
+# arrow works on vectors of (x,y,z), (u,v,w) points
+# quiver only 2d
+# work in tail, Δ form
+"""
+    arrow(tails, vs; kwargs...)
+
+Draw vectors `vs` anchored at `tails`.
+Hacked in support for 3D using combination of lines + cones.
+
+Use `Plotly` attributes `arrowcolor`, `arrowwidth`,
+"""
+function arrow(tails, vs; kwargs...)
+    p = _new_plot(; kwargs...)
+    arrow!(p, tails, vs; kwargs...)
+    p
+end
+
+arrow!(tails, vs; kwargs...) = arrow!(current_plot[], tails, vs; kwargs...)
+
+function arrow!(p::Plot, tails, vs;
+                kwargs...)
+    # what kind of data two points or
+    # vectors of points
+    _tail = first(tails)
+    if isa(_tail, Number)
+        N = length(tails)
+        tails = [tails]
+        vs = [vs]
+    else
+        __tail = first(_tail)
+        !isa(__tail, Number) && throw(ArgumentError("Not a point or container of points"))
+        N = length(_tail)
+    end
+    arrow!(p, Val(N), tails, vs; kwargs...)
+end
+
+function arrow!(p::Plot, ::Val{2}, tails, vs; kwargs...)
+    quiver!(p, unzip(tails)..., quiver=tuple(unzip(vs)...); kwargs...)
+    p
+end
+
+function arrow!(p::Plot, ::Val{3}, tails, vs; showscale=false, kwargs...)
+    _norm(x) = sqrt(sum(xᵢ*xᵢ for xᵢ ∈ x))
+
+    tips = map(.+, tails, vs)
+    x0,y0,z0 = unzip(tails)
+    x1,y1,z1 = unzip(tips)
+    #pad with NaN
+    x = collect(Iterators.flatten([[a,b,nothing] for (a,b) ∈ zip(x0,x1)]))
+    y = collect(Iterators.flatten([[a,b,nothing] for (a,b) ∈ zip(y0,y1)]))
+    z = collect(Iterators.flatten([[a,b,nothing] for (a,b) ∈ zip(z0,z1)]))
+    d1 = Config(;x,y,z, type="scatter3d", mode="lines", showscale, kwargs...)
+    push!(p.data, d1)
+
+    x,y,z = unzip(tips)
+    du,dv,dw = unzip(vs)
+
+    # adjust length of cone. This is fiddly
+    # https://plotly.com/python-api-reference/generated/plotly.graph_objects.Cone.html
+    λ = 0.1 # xxx make adjustable
+    M = maximum(_norm.(vs))
+    u,v,w = du ./ M, dv ./ M, dw ./ M
+
+    d2 = Config(;type="cone",
+                x,y,z,
+                u,v,w,
+                anchor="tip",
+                sizemode="absolute",
+                sizeref=  λ*M,
+                showscale,
+                kwargs...)
+    push!(p.data,  d2)
+    p
+end
+
 
 
 
