@@ -214,7 +214,8 @@ plot!(f::Function, args...; kwargs...) =  plot!(current_plot[], f, args...; kwar
 
 # convenience to make multiple plots by passing in vector
 # using plot! allows line customizations...
-function plot(fs::Vector{Function}, a, b; kwargs...)
+plot(fs::Vector{<:Function}, ab; kwargs...) = plot(fs, extrema(ab)...; kwargs...)
+function plot(fs::Vector{<:Function}, a, b; kwargs...)
     u, vs... = fs
     p = plot(u, a, b; kwargs...)
     for v ∈ vs
