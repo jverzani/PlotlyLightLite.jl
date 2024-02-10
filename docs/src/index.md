@@ -48,7 +48,8 @@ As a convenience, a vector of functions can be passed in. In which case, each is
 
 ### `plot(x, y)`.
 
-The `plot(x, y)` function simply connects the points ``(x_1,y_1), (x_2,y_2),\dots``  with a line in a dot-to-dot manner (the `lineshape` argument can modify this). If values in `y` are non finite, then a break in the dot-to-dot graph is made.
+The `plot(x, y)` function simply connects the points
+``(x_1,y_1), (x_2,y_2), \dots``  with a line in a dot-to-dot manner (the `lineshape` argument can modify this). If values in `y` are non finite, then a break in the dot-to-dot graph is made.
 
 When `plot` is passed a  function in the first argument, the `x`-`y` values are created by `unzip(f, a, b)` which uses an adaptive algorithm from `PlotUtils`.
 
