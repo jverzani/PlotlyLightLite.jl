@@ -293,10 +293,10 @@ end
 
 # Plots interface is 2/3 functions, not a tuple.
 plot(u::Function, v::Function, w::Function, args...; kwargs...) =
-    plot((u,v, w), args...; kwargs..)
+    plot((u,v, w), args...; kwargs...)
 
 plot(u::Function, v::Function, args...; kwargs...) =
-    plot((u,v), args...; kwargs..)
+    plot((u,v), args...; kwargs...)
 
 plot!(uv::Tuple{Function, Function}, a, b=nothing; kwargs...) =
     plot!(current_plot[], us, a, b; kwargs...)
@@ -691,8 +691,6 @@ end
 arrow!(tails, vs; kwargs...) = arrow!(current_plot[], tails, vs; kwargs...)
 
 function arrow!(p::Plot, tails, vs; kwargs...)
-function arrow!(p::Plot, tails, vs;
-                kwargs...)
     # what kind of data two points or
     # vectors of points
     _tail = first(tails)
