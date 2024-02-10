@@ -2,14 +2,14 @@
 
 Documentation for [PlotlyLightLite](https://github.com/jverzani/PlotlyLightLite.jl), a package to give `Plots`-like access to `PlotlyLight` for the graphs of Calculus.
 
-This package provides a light-weight alternative to `Plots.jl` which utilizes basically a subset of the `Plots` interface. It is inspired by `SimplePlots` and is envisioned as being useful within resource-constrained environments such as `binder.org`.
+This package provides a light-weight alternative to `Plots.jl` which utilizes basically a subset of the `Plots` interface. It is inspired by `SimplePlots` and is envisioned as being useful within resource-constrained environments such as [`binder.org`](https://mybinder.org/v2/gh/mth229/229-projects/lite?labpath=blank-notebook.ipynb).
 
 ```@example lite
 using PlotlyLightLite
 using PlotlyDocumenter # hide
 ```
 
-The plotting interface provided picks some of the many parts of `Plots.jl` that prove useful for the graphics of calculus and provides a stripped-down, though reminiscent interface using `PlotlyLight`, a package which otherwise is configured in a manner very-much like the underlying `JavaScript` implementation. The `Plots` package is great -- and has `Plotly` as a backend -- but for resource-constrained usage can be too demanding.
+The plotting interface provided picks some of the many parts of `Plots.jl` that prove useful for the graphics of calculus and provides a stripped-down, though reminiscent, interface using `PlotlyLight`, a package which otherwise is configured in a manner very-much like the underlying `JavaScript` implementation. The `Plots` package is great -- and has a `Plotly` backend -- but for resource-constrained usage can be too demanding.
 
 ## Supported plotting functions
 
@@ -53,6 +53,7 @@ The `plot(x, y)` function simply connects the points
 
 When `plot` is passed a  function in the first argument, the `x`-`y` values are created by `unzip(f, a, b)` which uses an adaptive algorithm from `PlotUtils`.
 
+Use `plot(x,y,z)` for plotting lines in 3 dimensions. For parameterized function, a tuple of functions (2 or 3) and an interval may be given.
 
 ### `scatter`
 
@@ -60,7 +61,7 @@ Related to `plot` and `plot!` is `scatter` (and `scatter!`) which plots just the
 
 ### Text and arrows
 
-The `annotate!` and `quiver!` functions are used to add text and/or arrows
+The `annotate!`, `quiver!`, `arrow` and `arrow!` functions are used to add text and/or arrows to a graphic.
 
 
 ### Shapes
@@ -108,6 +109,21 @@ delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
+Using a single function returning a point may be more natural for some usages. Below we use `unzip` to take a container of points into 3 containers for the coordinates, `x`, `y`, `z` to pass to `plot(x,y,z)`:
+
+```@example lite
+r(t) = (sin(t), cos(t), t)
+rp(t) = (cos(t), -sin(t), 1)
+
+ts = range(0, 4pi, length=251)
+plot(unzip(r.(ts))...)
+ts = range(0, 4pi, length=10)
+arrow!(r.(ts), rp.(ts))
+
+delete!(current().layout, :width)  # hide
+delete!(current().layout, :height) # hide
+to_documenter(current())           # hide
+```
 
 Contour, heatmaps, and surface plots can be produced by `contour`, heatmap, and `surface`. This example uses the [`peaks`](https://www.mathworks.com/help/matlab/ref/peaks.html) function of MATLAB:
 
@@ -126,7 +142,7 @@ contour(xs, ys, peaks)
 surface(xs, ys, peaks)
 ```
 
-Parametric surfaces can be produced as follows, where `unzip` creates 3 matrices to pass to `surface`:
+Parametric surfaces can be produced as follows, where, in this usage, `unzip` creates 3 matrices to pass to `surface`:
 
 ```@example lite
 r1, r2 = 2, 1/2
@@ -137,7 +153,7 @@ surface(unzip(us, vs, r)...)
 
 
 !!! note "FIXME"
-    The above surface and contour graphics aren't rendering properly in the documentation so aren't shown to avoid confusing
+    The above surface and contour graphics aren't rendering properly in the documentation, so aren't shown.
 
 ### Keyword arguments
 
