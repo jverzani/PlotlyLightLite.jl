@@ -2,7 +2,7 @@
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "bf6688ddf98e848c2935e2bfd4346544c2f86181"
+project_hash = "db4ab56f6d343b51cb940811424dd5135cefcc0e"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -131,6 +131,11 @@ version = "1.5.4"
     [deps.ConstructionBase.weakdeps]
     IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
     StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[[deps.Contour]]
+git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
+uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
+version = "0.6.2"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -385,7 +390,7 @@ version = "0.7.4"
 deps = ["PlotUtils", "PlotlyLight"]
 path = "/Users/jverzani/julia/PlotlyLightLite.jl/"
 uuid = "b323ca16-7103-4e40-9e60-7dc7d60a998a"
-version = "0.1.0"
+version = "0.1.1"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
