@@ -155,6 +155,51 @@ us = vs = range(0, 2pi, length=25)
 surface(unzip(us, vs, r)...)
 ```
 
+This last example shows how to plot a surface and two planes along with their intersections emphasized. The latter uses the `Contours` package. One plane use the form ``ax + by + cz = d`` which for non-zero `c` has `z(x,y)` solvable and is plotted as surface. The intersection of the surface and the plane is the ``0``-level contour of the function ``f(x,y) - z(x,y)``.
+
+The other plane has ``c=0``, so is plotted differently. That plane is [described](https://community.plotly.com/t/slicing-3d-surface-plot-along-a-user-selected-axis/40771/6) as lying in the direction of the vectors ``[a,b,0]`` and ``[0,0,1]]`` and going through the point ``[x_0, y_0, 0]``. This gives ``b(x-x_0) - a(y-y_0) = 0``. The intersecion can be found by projecting the line in the ``x-y`` plane onto the surface.
+
+```@example lite
+f(x, y) = 4 - x^2 - y^2
+
+xs = ys = range(-2, 2, length=100)
+surface(xs, ys, f; legend=false, showscale=false)
+
+# plane of the from a*x + b*y + c*z = d, c != 0
+a,b,c,d = 1,1,1,2.5
+z(x,y) = (d - a*x - b*y) / c
+surface!(xs, ys, z, opacity=0.25, showscale=false)
+
+# One way to plot intersection numerically
+import Contour
+cs = Contour.contours(xs, ys, ((x,y) -> f(x,y) - z(x,y)).(xs', ys), [0])
+for cl ∈ Contour.levels(cs)
+    for line in Contour.lines(cl)
+        xₛ, yₛ = Contour.coordinates(line) # coordinates of this line segment
+        plot!(xₛ, yₛ, z.(xₛ, yₛ), linecolor="black", linewidth=10)
+    end
+end
+
+# plane parallel to [a,b,0], [0,0,1] and through [x0,y0,0]
+a,b = 1, 1
+x0, y0 = 0, 0 # origin
+
+zs = range(-4, 4, length=100) # or extrema(z.(xs', ys))
+Xs = ((x,z) -> x).(xs', zs)
+Zs = ((x,z) -> z).(xs', zs)
+
+c, d = 0, b*x0 - a * y0
+plane(x,z) = (d + a*x - c*z) / b
+Ys = plane.(xs', zs)
+surface!(Xs, Ys, Zs, opacity=0.25, showscale=false)
+
+g(t) = (b*t -d)/a # line in x-y plane
+xxs = xs
+yys = g.(xxs)
+zzs = f.(xxs, yys)
+plot!(xxs, yys, zzs, linewidth=10, linecolor="black")
+```
+
 
 !!! note "FIXME"
     The above surface and contour graphics aren't rendering properly in the documentation, so aren't shown.
