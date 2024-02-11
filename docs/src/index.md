@@ -109,6 +109,10 @@ delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
+(The use of tuples to pair functions is idiosyncratic; the `Plots.jl` style of passing functions for the first 2 or 3 positional arguments is also supported.)
+
+
+
 Using a single function returning a point may be more natural for some usages. Below we use `unzip` to take a container of points into 3 containers for the coordinates, `x`, `y`, `z` to pass to `plot(x,y,z)`:
 
 ```@example lite
