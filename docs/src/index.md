@@ -206,38 +206,11 @@ plot!(xxs, yys, zzs, linewidth=10, linecolor="black")
 
 ### Shapes
 
-Rect, line, ...
+Shapes do not follow the `Plots.jl` docs.
 
-3d rect
+There are 2d shapes following Plotly in `rect!`, `circle`, `hline!`, and `vline!`.
 
-Example. A rectangle in three dimensions can be determined by two vectors `v` and `w` and point `p`. Three dimensional plots require a mesh. The `mesh3d` type is used to create this.
-
-```@example lite
-function rect3d(x,y,z; kwargs...)
-    length(x) == 4 || throw(ArgumentError("4 points"))
-    i = [0,2] # which indices to use for triangulation
-    j = [1,3]
-    k = [2,0]
-    Config(;x,y,z,i,j,k, type="mesh3d",  kwargs...)
-end
-
-# recdtangle with anchor q, vectors v, w
-q = [0,0,0]
-v = [1,2,0]
-w = [0,0,1]
-x,y,z = unzip([q, q+v, q+v+w, q+w])
-
-# add trace to plot by pushing onto data field
-d = rect3d(x, y, z, color="yellow", opacity=.2)
-p = plot()
-push!(p.data, d)
-
-# add vectors
-plot!(unzip([q, q+v])..., linewidth=3, showlegend=false)
-plot!(unzip([q, q+w])..., linewidth=3, showlegend=false)
-
-p
-```
+There are 3d shapes provided in `parallelogram!` and `circ3d!`.
 
 ### Keyword arguments
 
