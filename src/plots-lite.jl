@@ -693,6 +693,98 @@ function circle!(p::Plot, x0, x1, y0, y1; kwargs...)
 end
 
 ## ----
+# 3d shapes  use mesh3d, a type that requires care to specify indices
+# for the needed triangulation.
+# In the following we do this for *convex* polygons described by x,y,z
+function _plot_convex_polygon!(p::Plot, x, y, z; kwargs...)
+    n = length(x)
+    i = zeros(Int,n-1)
+    j = 1:n-1
+    k = mod.(1 .+ j, n)
+
+    d = Config(;x,y,z,i,j,k, type="mesh3d", kwargs...)
+    push!(p.data, d)
+    p
+end
+_plot_convex_polygon!(x, y, z; kwargs...) =
+    plot_convex_polygon!(current_plot[], x, y, z; kwargs...)
+
+# a few implementations a parallelogram and a disc
+"""
+    parallelogram(q, v̄, w̄; kwargs...)
+    parallelogram!([p::Plot], q, v̄, w̄; kwargs...)
+
+Plot parallelogram formed by two vectors, `v̄` and `w̄`, both anchored at point `q`.
+"""
+function parallelogram(q, v̄, w̄; kwargs...)
+    p = _new_plot(;kwargs...)
+    parallelogram!(p, q, v̄, w̄; kwargs...)
+end
+parallelogram!(q, v̄, w̄; kwargs...) =
+    parallelogram!(current_plot[], q, v̄, w̄; kwargs...)
+
+function parallelogram!(p::Plot, q, v̄, w̄; kwargs...)
+    xyzₛ = [q, q + v̄, q + v̄ + w̄, q + w̄]
+    _plot_convex_polygon!(p, unzip(xyzₛ)...; kwargs...)
+end
+
+"""
+    circ3d(q, r, n̄; kwargs...)
+    circ3d!([p::Plot], q, r, n̄; kwargs...)
+
+Plot circle in 3 dimensions with center at `q`, radius `r`, and perpendicular to normal vector `n̄`.
+
+# Example
+```
+Z(r, θ) = 4 - r
+X(r, θ) = r * cos(θ)
+Y(r, θ) = r * sin(θ)
+rs = range(0,4, length=10)
+θs = range(0, 2pi, length=100)
+surface(X.(rs', θs), Y.(rs', θs), Z.(rs', θs); opacity=0.25)
+q = [0,0,2]
+n = [0,0,1]
+r = 2
+circ3d!(q, r, n; color="black", opacity=0.75)
+q, v̂, ŵ = [0,0,0], [0,4,0], [0,0,4]
+parallelogram!(q, v̂, ŵ; opacity=0.5, color=:yellow)
+"""
+function circ3d(q, r, n̄; kwargs...)
+    p = _new_plot(;kwargs...)
+    circ3d!(p, q, n̄, r; kwargs...)
+end
+circ3d!(q, r, n̄; kwargs...) =
+    circ3d!(current_plot[], q, r, n̄; kwargs...)
+
+function circ3d!(p::Plot, q, r, n̄; kwargs...)
+    _cross = (v,w) -> [v[2]*w[3] - v[3]*w[2], -v[1]*w[3] + v[3]*w[1], v[1]*w[2] - v[2]*w[1]]
+    _norm = v -> sqrt(sum(vᵢ^2 for vᵢ∈v))
+
+    n = 100
+
+    v = n̄
+    v̂ = v / _norm(v)
+
+    if iszero(v[1]) && iszero(v[2])
+        ŵ = [1,0,0]
+    else
+        w = [v[2],-v[1],0]
+        ŵ = w / _norm(w)
+    end
+
+    û = _cross(v̂,  ŵ)
+
+    xyzₛ = [q + cos(t) * (r*ŵ)+ sin(t) * (r*û) for t in range(0, 2pi, length=n)]
+
+    _plot_convex_polygon!(p, unzip(xyzₛ)...; kwargs...)
+end
+
+
+
+
+
+
+## ----
 
 """
     annotate!([p::Plot], x, y, txt; [color], [family], [pointsize], [halign], [valign])

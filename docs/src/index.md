@@ -204,6 +204,14 @@ plot!(xxs, yys, zzs, linewidth=10, linecolor="black")
 !!! note "FIXME"
     The above surface and contour graphics aren't rendering properly in the documentation, so aren't shown.
 
+### Shapes
+
+Shapes do not follow the `Plots.jl` docs.
+
+There are 2d shapes following Plotly in `rect!`, `circle`, `hline!`, and `vline!`.
+
+There are 3d shapes provided in `parallelogram!` and `circ3d!`.
+
 ### Keyword arguments
 
 The are several keyword arguments used to adjust the defaults for the graphic, for example, `legend=false` and `markersize=10`. Some keyword names utilize `Plots.jl` naming conventions and are translated back to their `Plotly` counterparts. Additional keywords are passed as is so should use the `Plotly` names.
