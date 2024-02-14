@@ -10,7 +10,7 @@ using Test
     p₁ = plot(u, a, b)
     p₂ = plot(u, I)
     p₃ = scatter([1,2, NaN,4], [1,NaN, 3,4])
-    grid_layout([p₁ p₂; p₃ Plot()], legend=false)
+    plot([p₁ p₂; p₃ Plot()], legend=false)
 
     p = plot(u, a, b)
     xlims!(p, (1,2))

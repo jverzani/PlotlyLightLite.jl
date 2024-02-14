@@ -210,7 +210,7 @@ Shapes do not follow the `Plots.jl` docs.
 
 There are 2d shapes following Plotly in `rect!`, `circle`, `hline!`, and `vline!`.
 
-There are 3d shapes provided in `parallelogram!` and `circ3d!`.
+There are 3d shapes provided in `parallelogram!`, `circ3d!`, and `skirt!`.
 
 ### Keyword arguments
 

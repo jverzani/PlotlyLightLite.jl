@@ -1,12 +1,4 @@
 ## --- plotting
-export plot, plot!
-export scatter, scatter!,  contour, contour!, surface, surface!, quiver, quiver!
-export grid_layout
-export annotate, annotate!, title!, size!, legend!
-export xlabel!, ylabel!, xlims!, ylims!, xaxis!, yaxis!
-export rect!, circle!, hline!, vline!
-export current
-
 
 ## utils
 const current_plot = Ref{Plot}() # store current plot
@@ -779,8 +771,65 @@ function circ3d!(p::Plot, q, r, n̄; kwargs...)
     _plot_convex_polygon!(p, unzip(xyzₛ)...; kwargs...)
 end
 
+"""
+    skirt(q, v, f::Function; kwargs...)
+    skirt!([p::Plot], q, v, f::Function;
+    skirt!([p::Plot], xs, ys, zs, f::Function;
 
+Along a path `(xs, ys, zs)` plot a skirt between the path and `(xs, ys, f(xs, ys))`. The case of a path described by a vector, `v`, anchored at a point `q` has a special method.
 
+## Example
+```
+x(r, θ) = r*cos(θ)
+y(r, θ) = r*sin(θ)
+f(x,y) = 4 - x^2 - y^2
+rs, θs = range(0,2,length=10), range(0, 2pi, length=20)
+xs, ys = x.(rs', θs), y.(rs', θs)
+zs = f.(xs, ys)
+surface(xs, ys, zs, opacity=.2, showscale=false)
+
+q = [0,0,0]
+v = [2,0,0]
+d = skirt!(q, v, f; opacity=0.6)
+
+t = range(0, 1, length=100)
+xs = 2 * t .* sin.(t*pi/2)
+ys = 2 * t .* cos.(t*pi/2)
+zs = zero.(xs)
+skirt!(xs, ys, zs, f; color="blue", opacity=0.6)
+skirt!(xs, -ys, zs, f; color="blue", opacity=0.6)
+```
+
+"""
+function skirt(q, v, f::Function; kwargs...)
+    _new_plot(;kwargs...)
+    skirt!(p, q, v, f; kwargs...)
+end
+skirt!(q, v, f::Function; kwargs...) = skirt!(current(), q, v, f; kwargs...)
+function skirt!(p::Plot, q,v,f::Function; kwargs...)
+    ts = range(0,1, length=50)
+    xs, ys, zs = unzip([q + t*v for t ∈ ts])
+    skirt!(p, xs, ys, zs, f)
+end
+# xs, ys, zs are path in space
+skirt!(xs, ys, z₀s, f::Function; kwargs...) =
+    skirt!(current_plot[], xs, ys, z₀s, f; kwargs...)
+function skirt!(p::Plot, xs, ys, z₀s, f::Function; kwargs...)
+    zs = f.(xs, ys)
+    # need to join xs, ys, zs to get x,y,z
+    x = collect(Base.Iterators.flatten(zip(xs,xs)))
+    y = collect(Base.Iterators.flatten(zip(ys,ys)))
+    z = collect(Base.Iterators.flatten(zip(z₀s,zs)))
+
+    n = length(x)
+    iₛ = 0:2:(n-4)
+    i = collect(Base.Iterators.flatten(zip(iₛ, iₛ .+ 1)))
+    j = i .+ 1
+    k = i .+ 2
+    d = Config(; x, y, z, i, j, k, type="mesh3d", kwargs...)
+    push!(p.data, d)
+    p
+end
 
 
 
