@@ -94,8 +94,8 @@ export quiver, quiver!, arrow, arrow!
 export annotate, annotate!, title!, size!, legend!
 export xlabel!, ylabel!, xlims!, ylims!, xaxis!, yaxis!
 export rect!, circle!, hline!, vline!
-export parallelogram, parallelogram!, circ3d, circ3d!
-export gcf
+export parallelogram, parallelogram!, circ3d, circ3d!, skirt, skirt!
+export current
 
 export unzip
 
