@@ -11,11 +11,16 @@ makedocs(
                            canonical="https://jverzani.github.io/PlotlyLightLite.jl",
                            edit_link="main",
                            assets=String[],
-                           size_threshold_ignore = ["index.md"],
+                           size_threshold_ignore = ["basic-graphics.md","three-d-graphics.md", "three-d-shapes.md"],
                            ),
 
     pages=[
         "Home" => "index.md",
+        "Features" => [
+            "Basics" => "basic-graphics.md",
+            "3D graphics" => "three-d-graphics.md",
+            "3D shapes" => "three-d-shapes.md"
+        ],
         "Reference/API" => "reference.md",
     ],
 

@@ -2,7 +2,7 @@
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "db4ab56f6d343b51cb940811424dd5135cefcc0e"
+project_hash = "25a9f11e0e2c3d0ceb9378c791ae6f4967260923"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -390,7 +390,7 @@ version = "0.7.4"
 deps = ["PlotUtils", "PlotlyLight"]
 path = "/Users/jverzani/julia/PlotlyLightLite.jl/"
 uuid = "b323ca16-7103-4e40-9e60-7dc7d60a998a"
-version = "0.1.1"
+version = "0.1.2"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
