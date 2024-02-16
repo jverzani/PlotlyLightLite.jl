@@ -31,7 +31,7 @@ These are used to provide the following shapes
 * `skirt!` which forms a surface defined by an underlying path (either the vector `v` anchored at `q` or by values `xs`, `ys`, `zs`) and the paths projection onto the surface of `f(x,y)`
 
 
-# Interesection of 3 planes
+# Intersection of 3 planes
 
 The `parallelogram` function allows planes to easily be described. Contrast the following to an example in the previous section when a plane ``ax + by = d`` was described as a parametric surface in order to graph it with `surface`. Here such planes are described by two orthogonal vectors.
 
