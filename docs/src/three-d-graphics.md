@@ -1,15 +1,6 @@
 # 3 dimensional graphs
 
-The initial graphics of calculus involve the ``x-y`` plane but eventually the visualizations require a ``z`` direction. This is because functions ``f:R \rightarrow R`` are graphed in ``x-y`` values, but functions such as ``f:R^2 \rightarrow R`` or ``f:R \rightarrow R^3`` use the third dimension.
-
-```@example lite
-using PlotlyLightLite
-using PlotlyDocumenter # hide
-
-version = PlotlyLightLite.PlotlyLight.version[] # hide
-PlotlyDocumenter.change_default_plotly_version(version) # hide
-nothing # hide
-```
+The initial graphics of calculus involve the ``x-y`` plane but eventually the visualizations require a ``z`` direction. This is because functions ``f:R \rightarrow R`` are graphed in ``x-y`` values, but functions such as ``f:R^2 \rightarrow R`` or ``f:R \rightarrow R^3`` naturally use the third dimension.
 
 
 
@@ -18,6 +9,16 @@ nothing # hide
 Parametric line plots show the graph of ``f:R \rightarrow R^3`` by a plot linking the points ``(x(t), y(t), z(t))``.
 
 Parametric plots can be easily created by using a tuple of functions, as in:
+
+```@example lite
+using PlotlyLightLite # load package if not loaded
+using PlotlyDocumenter # hide
+
+version = PlotlyLightLite.PlotlyLight.version[] # hide
+PlotlyDocumenter.change_default_plotly_version(version) # hide
+nothing # hide
+```
+
 
 ```@example lite
 plot((sin, cos, x -> x), 0, 4pi)
@@ -47,16 +48,16 @@ delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
-In the above we used `arrow!` to indicate the tangent direction. The `arrow!` function hacks together an arrow, as there is no underlying 3-dimensional arrow in `Plotly`.
+In the above we used `arrow!`, with a collection of tails and vectors, to indicate the tangent direction. The `arrow!` function hacks together an arrow, as there is no underlying 3-dimensional arrow in `Plotly`.
 
 !!! note "arrow!"
     The cones used for the arrow heads are not always scaled properly.
 
 ## Visualizing ``f:R^2 \rightarrow R``
 
-Functions of the two variables which return a single, scalar, value can be visualized in different ways. Using 3 dimensions one can use the ``x-y`` plane to denote the inputs and the ``z`` axis the value forming a surface. In 2 dimensions the value can be represented a few ways: using colors, as with heatmaps, or using a line to show ``(x,y)`` values with the same ``z`` value, as with contour maps.
+Functions of the two variables which return a single, scalar value can be visualized in different ways. Using ``3`` dimensions one can use the ``x-y`` plane to denote the inputs and the ``z`` axis the value forming a surface. In ``2`` dimensions the value can be represented a few ways: using colors, as with heatmaps, or using a line to show ``(x,y)`` values with the same ``z`` value, as with contour maps.
 
-Contour, heatmaps, and surface plots can be produced by `contour`, `heatmap`, and `surface`. This example uses the [`peaks`](https://www.mathworks.com/help/matlab/ref/peaks.html) function of MATLAB:
+Contour, heatmaps, and surface plots can be produced by `contour`, `heatmap`, and `surface`. Some examples here use the [`peaks`](https://www.mathworks.com/help/matlab/ref/peaks.html) function of MATLAB:
 
 ```@example lite
 function peaks(x,y)
@@ -78,6 +79,8 @@ delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
+### Contour graphs
+
 The contour lines are automatically selected. Passing a range to the `levels` argument allows a user choice. Contour plots can be filled with colors. Passing `fill=true` is all it takes:
 
 ```@example lite
@@ -98,6 +101,8 @@ The `Plots.jl` argument `fill` is used to indicate if the space between the cont
 The `Plotly` argument `colorscale` can be one several scales including `"YlOrRd"`, `"YlGnBu"`, `"RdBu"`, `"Portland"`, `"Picnic"`, `"Jet"`, `"Hot"`, `"Greys"`, `"Greens"`, `"Bluered"`, `"Electric"`, `"Earth"`, `"Blackbody"`, `"Viridis"`, and `"Cividis"`.
 
 
+### Heatmaps
+
 A heatmap uses color variation, not contour lines, to indicate the differences in ``z`` values. As with `contour`, the `colorscale` argument is passed to `Plotly`:
 
 ```@example lite
@@ -108,11 +113,11 @@ delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
-#### Implicitly defined functions
+### Implicitly defined functions
 
-The equation ``f(x,y) = 0`` for a fixed ``x`` may have many ``y`` values for a solution. However, *locally* for most points and nice functions ``f`` there is an *implicitly* defined function ``y(x)``. The `implicit_plot` function can be used to show such. It is basically a contour plot with only a ``0`` level.
+The equation ``f(x,y) = 0`` for a fixed ``x`` may have many ``y`` values for a solution. However, *locally* for most points and nice functions ``f`` there is an *implicitly* defined function ``y(x)``. This is useful, say if a tangent line is sought. The `implicit_plot` function can be used to show implicitly defined function given by ``f(x,y)=0``. It is basically a contour plot with only a ``0`` level.
 
-The implementation only asks for a range of ``x`` and ``y`` values to search over. These are specified by arguments `xlims` and `ylims` with a default yielding the region ``[-5,5] \times [-5,5]``.
+The implementation only asks for a range of ``x`` and ``y`` values to search over. It chooses the number of intermediate points. The ranges are specified through the arguments `xlims` and `ylims` with defaults yielding the region ``[-5,5] \times [-5,5]``.
 
 For example:
 
@@ -128,11 +133,11 @@ to_documenter(current())           # hide
 
 ### Surface plots
 
-By surface plot we mean a representation of a 2 dimensional structure within 3 dimensions, as can be visualised.
+By surface plot we mean a representation of a ``2`` dimensional structure within ``3`` dimensions, as can be visualised.
 
 There are two primary ways of generating these:
 
-* A function $f: R^2 \rightarrow R$ can be visualized with the ``x-y`` plane showing the inputs and the ``z`` axis the values.
+* A bivariate, scalar function $f: R^2 \rightarrow R$ can be visualized with the ``x-y`` plane showing the inputs and the ``z`` axis the values.
 * A parametric description with some function $F(u,v) = \langle X(u,v), Y(u,v), Z(u,v) \rangle$.
 
 We illustrate each:
@@ -169,7 +174,8 @@ r1, r2 = 2, 1/2
 r(u,v) = ((r1 + r2*cos(v))*cos(u), (r1 + r2*cos(v))*sin(u), r2*sin(v))
 us = vs = range(0, 2pi, length=25)
 
-p = surface(unzip(us, vs, r)...; aspect_ratio=:equal)
+p = surface(unzip(us, vs, r)...;
+	aspect_ratio=:equal, showscale=false)
 
 delete!(current().layout, :width)  # hide
 delete!(current().layout, :height) # hide
@@ -177,7 +183,7 @@ to_documenter(current())           # hide
 ```
 
 
-There isn't much support for arguments from `Plots` implementation.
+There isn't much support for arguments from `Plots` implementation, save:
 
 * `aspect_ratio = :equal` sets the underlying aspect ratio to be equal.
 
@@ -185,13 +191,13 @@ Many `Plotly` arguments are quite useful:
 
 * `zcontour=true` will add a contour graph showing the levels
 * `opacity` makes it easy to set the transparency of the rendered object
-* `eye`, `center`, and `up` can adjust the camera.
+* `eye`, `center`, and `up` can adjust the camera positioning.
 * `showscale=false` can be specified to avoid the drawing of a color scale.
 
 
-This last example shows how to plot a surface and two planes along with their intersections emphasized. The latter uses the `Contours` package. One plane uses the form ``ax + by + cz = d`` which for non-zero `c` has `z(x,y)` solvable and is plotted as surface. The intersection of the surface and the plane is the ``0``-level contour of the function ``f(x,y) - z(x,y)``.
+This last example shows how to plot a surface and two planes along with their intersections with the surface emphasized. The latter uses the `Contours` package. One plane has the form ``ax + by + cz = d`` which for non-zero `c` has `z(x,y)` solvable and is visualized through `surface`. The intersection of the surface and the plane is the ``0``-level contour of the function ``f(x,y) - z(x,y)``.
 
-The other plane has ``c=0``, so is plotted differently. That plane is [described](https://community.plotly.com/t/slicing-3d-surface-plot-along-a-user-selected-axis/40771/6) as lying in the direction of the vectors ``[a,b,0]`` and ``[0,0,1]`` and going through the point ``[x_0, y_0, 0]``. This gives ``b(x-x_0) - a(y-y_0) = 0``. The intersecion can be found by projecting the line in the ``x-y`` plane onto the surface.
+The other plane has ``c=0``, so is plotted differently. That plane is [described](https://community.plotly.com/t/slicing-3d-surface-plot-along-a-user-selected-axis/40771/6) as lying in the direction of the vectors ``[a,b,0]`` and ``[0,0,1]`` and going through the point ``[x_0, y_0, 0]``. This gives ``b(x-x_0) - a(y-y_0) = 0``. We plot this parametrically. The intersecion can be found by projecting the line in the ``x-y`` plane onto the surface.
 
 ```@example lite
 f(x, y) = 4 - x^2 - y^2

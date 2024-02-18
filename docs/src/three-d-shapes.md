@@ -12,7 +12,7 @@ nothing # hide
 !!! note "Not `Plots` inspired"
     The three dimensional shapes discussed here are developed without paying attention to any `Plots.jl` interfaces.
 
-Many surfaces are easily described in turns of being the graph of a function ``f:R^2 \rightarrow R`` or in turns of a parameterization ``F(u,v) = \langle X(u,v), Y(u,v), Z(u,v) \rangle``. The `surface` function readily plots such. However, some surfaces can be more readily described, and `PlotlyLightLite` attempts to provide some interface in a few cases.
+Many surfaces are easily described in turns of being the graph of a function ``f:R^2 \rightarrow R`` or in turns of a parameterization ``F(u,v) = \langle X(u,v), Y(u,v), Z(u,v) \rangle``. The `surface` function readily plots such. However, some surfaces can be more easily described otherwise, and `PlotlyLightLite` attempts to provide some interface in a few cases.
 
 Rather than use the `surface` type, the following use the `mesh3d` type which requires a triangularization of the desired surface. Two types of surfaces that are easily triangulated are:
 
@@ -24,9 +24,9 @@ The underlying functions have the odd names `★` (i.e., `\bigstar[tab]`) and `z
 
 These are used to provide the following shapes
 
-* `parallelogram!` which draws the planar region formed by two vectors `u` and `v` anchored at a point `q`.
+* `parallelogram)q, u, v)!` which draws the planar region formed by two vectors `u` and `v` anchored at a point `q`.
 
-* `circ3d!` which draws the disc with origin `q`, radius `r` and normal to a vector `n`
+* `circ3d!(q, r, n)` which draws the disc with origin `q`, radius `r` and normal to a vector `n`
 
 * `skirt!` which forms a surface defined by an underlying path (either the vector `v` anchored at `q` or by values `xs`, `ys`, `zs`) and the paths projection onto the surface of `f(x,y)`
 

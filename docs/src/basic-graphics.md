@@ -9,12 +9,13 @@ Some principles of `Plots` are:
 
 The `PlotlyLightLite.jl` interface *mostly* follows this. However, only *some* of the `Plots.jl` keyword arguments are supported. Other keyword arguments are passed directly to [Plotly](https://plotly.com/javascript/) and so should follow the naming conventions therein.
 
+The `PlotlyLight` interface is essentially the `JavaScript` interface for `Plotly` only with the cleverly convenient `Config` constructor used to create the nested JavaScript data structures needed through conversion with `JSON3`. All arguments are like keyword arguments.
 
 * In Plots.jl, every column is a series, a set of related points which form lines, surfaces, or other plotting primitives.
 
 `Plotly` refers to series as traces. This style is not supported in `PlotlyLightLite`, rather multiple layers are suggested. (E.g. plot each column of a matrix.)
 
-* In `Plots.jl` for keyword argument many aliases are used for brevity.
+* In `Plots.jl` for keyword arguments many aliases are used, allowing for shorter calling patterns for experienced users.
 
 This is not the case with `PlotlyLightLite`.
 
@@ -22,24 +23,21 @@ This is not the case with `PlotlyLightLite`.
 
 This is not the case with `PlotlyLightLite`.
 
-## Installation
 
-The package is not registered. It may be installed through `Pkg.add(url="..."))`.
+## Supported plotting functions
 
-Once installed, the package is loaded in the standard manner.
+We load the package in the typical manner:
+
 ```@example lite
 using PlotlyLightLite
 using PlotlyDocumenter # hide
 ```
 
-
-## Supported plotting functions
-
-
+This package directly implements some of the `Plots` recipes for functions that lessen the need to manipulate data.
 
 ### `plot(f, a, b)`
 
-The simplest means to plot a function `f` over the interval `[a,b]` is the pattern `plot(f, a, b)`. For example:
+The simplest means to plot a function `f` over the interval `[a,b]` is the declarative pattern `plot(f, a, b)`. For example:
 
 ```@example lite
 plot(sin, 0, 2pi)
@@ -49,19 +47,24 @@ delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
-The `sin` object refers to a the underlying function to compute sine. More commonly, the function is user-defined as `f`, or some such, and that function object is plotted. The interval may be specified using two numbers or with a container, in which case the limits come from calling `extrema`.
+The `sin` object refers to a the underlying function to compute sine. More commonly, the function is user-defined as `f`, or some such, and that function object is plotted.
+
+The interval may be specified using two numbers or with a container, in which case the limits come from calling a method of `extrema` for `Plot` objects. A default of ``(-5,5)`` is used when no interval is specified.
 
 For line plots, as created by this usage, the supported key words include
 
 * `linecolor` to specify the color of th eline
 * `linewidth` to adjust width in pixels
 * `linestyle` to adjust how line is drawn
+* `legend` to indicate if no legend should be given. Otherwise, `label` can be used to name the entry for given trace.
 
+!!! note
+    All plotting functions in `PlotlyLightLite` return an instance of `PlotlyLight.Plot`. These objects can be directly modified and re-displayed. The `show` method creates the graphic for viewing. The `current` function returns the last newly created plot.
 
 
 ### `plot!`
 
-Layers can be added to a basic plot. The notation follows `Plots.jl` and uses `Julia`'s convention of indicating functions which mutate their arguments with a `!`. The underlying plot is mutated (by adding a layer) and reference to this may or may not be in the `plot!` call. (When missing, the current plotting figure, determined by `current()`, is used.)
+Layers can be added to a figure created by `plot`. The notation follows `Plots.jl` and uses `Julia`'s convention of indicating functions which mutate their arguments with a `!`. The underlying plot is mutated (by adding a layer) and reference to this may or may not be in the `plot!` call. (When missing, the current plotting figure, determined by `current()`, is used.)
 
 ```@example lite
 plot(sin, 0, 2pi)
@@ -80,29 +83,22 @@ to_documenter(current())           # hide
 
 As a convenience, to plot two or more traces in a graphic, a vector of functions can be passed in. In which case, each is plotted over the interval. (Similar to using `plot` to plot the first and `plot!` to add the rest.)
 
-The keyword arguments are passed to the first function only. For more control, using `plot!`, as above.
+The `Plots` keyword `line` arguments are recycled. For more control, using `plot!`, as above.
 
-### `plot(x, y, [z])`.
+### `plot(xs, ys, [zs])`.
 
-The `plot(x, y)` function simply connects the points
+The `plot(xs, ys)` function simply connects the points
 ``(x_1,y_1), (x_2,y_2), \dots``  sequentially with lines in a dot-to-dot manner (the `lineshape` argument can modify this). If values in `y` are non finite, then a break in the dot-to-dot graph is made.
 
 When `plot` is passed a  function in the first argument, the `x`-`y` values are created by `xs = unzip(f, a, b)` which uses an adaptive algorithm from `PlotUtils`; the values `x=xs` and `y=f.(xs)` are used.
 
-Use `plot(x,y,z)` for line plots in 3 dimensions, which is illustrated in a different section.
+Use `plot(xs, ys, zs)` for line plots in 3 dimensions, which is illustrated in a different section.
 
 ### `plot(f::Function, g::Function, a, b)` or `plot(fs::Tuple, a, b)`
 
 Two dimensional parametric plots show the trace of ``(f(t), g(t))`` for ``t`` in ``[a,b]``. These are easily created by `plot(x,y)` where the `x` and `y` values are produced by broadcasting, say, such as `f.(ts)` where `ts = range(a,b,n)`.
 
 The `Plots.jl` convenience signature is `plot(f::Function, g::Function, a, b)`. This packages also provides for passing a tuple of functions, as in `plot((f,g), a, b)`.
-
-
-### `plot(; kwargs...)`
-
-This basically is the same as `PlotlyLight`'s `Plot` function, but adds a reference so that `current` will point to the new `Plot` object.
-
-Unlike `plot` in `Plots.jl`, the `plot` function -- except in this usage -- always returns a line plot.
 
 ### `plot(::Array{<:Plot,N})`
 
@@ -111,11 +107,18 @@ Arrange an array of plot objects into a regular layout for display.
 (`Plots.jl` uses a different convention.)
 
 
-### `scatter(x, y)`
+### `plot(; kwargs...)`
 
-The `plot` function represent the data with type `line` which instructs `Plotly` to connect points with lines.
+This basically is the same as `PlotlyLight`'s `Plot` function, but adds a reference so that `current` will point to the new `Plot` object.
 
-Related to `plot` and `plot!` are `scatter` and `scatter!`. These functions plots just the points, without connecting the dots.
+Unlike `plot` in `Plots.jl`, the `plot` function -- except in this usage and the previous -- always producesa line plot.
+
+
+### `scatter(xs, ys, [zs])`
+
+Save for methods, the `plot` method represents the data with type `line` which instructs `Plotly` to connect points with lines.
+
+Related to `plot` and `plot!` are `scatter` and `scatter!`; which render just the points, without connecting the dots.
 
 
 The following `Plots.jl` marker attributes are supported:
@@ -148,12 +151,12 @@ There is no `Text` function.
 
 ### Shapes
 
-For basic shapes there are `hline!`, `vline!`, `rect!`, and `circle!`.
+For simple shapes there are `hline!`, `vline!`, `rect!`, and `circle!`.
 
 * `hline!(y)` draws a horizontal line at elevation `y` across the computed axis The `extrema` function computes the axis sizes.
 * `vline(x)`  draws a vertical line at  `x` across the computed axis. The `extrema` function computes the axis sizes.
-* `rect!(x0, x1, y0, y1)` draws a rectangle between `(x0,y0)` and `(x1,y1)`. The `Plotly`  arguments `fillcolor` and `opacity` can be used to fill the rectangle with color.
-* `circle!(x0, x1, y0, y1)` draws a "circular" shape in the rectangle given by `(x0, y0)` and `(x1, y1)`. The `Plotly`  arguments `fillcolor` and `opacity` can be used to fill the circle with color.
+* `rect!(x0, x1, y0, y1)` draws a rectangle between `(x0,y0)` and `(x1,y1)`. The `Plotly`  arguments `fillcolor` and `opacity` can be used to fill the rectangle with color. The `line` argument of `Plotly` can be used to adjust properties of the boundary.
+* `circle!(x0, x1, y0, y1)` draws a "circular" shape in the rectangle given by `(x0, y0)` and `(x1, y1)`. The `Plotly`  arguments `fillcolor` and `opacity` can be used to fill the circle with color. The `line` argument of `Plotly` can be used to adjust properties of the boundary.
 
 
 ----
@@ -162,9 +165,6 @@ For basic shapes there are `hline!`, `vline!`, `rect!`, and `circle!`.
 For example, this shows how one could visualize the points chosen in a plot, showcasing both `plot` and `scatter!` in addition to a few other plotting commands:
 
 ```@example lite
-using Roots
-
-
 f(x) = x^2 * (108 - 2x^2)/4x
 x, y = unzip(f, 0, sqrt(108/2))
 plot(x, y; legend=false)
@@ -176,20 +176,21 @@ quiver!([2,4.3,6],[10,50,10], ["sparse","concentrated","sparse"],
 # add rectangles to emphasize plot regions
 y0, y1 = extrema(current()).y  # get extent in `y` direction
 rect!(0, 2.5, y0, y1, fillcolor="#d3d3d3", opacity=0.2)
-rect!(2.5,6, y0, y1, line=(color="black",), fillcolor="orange", opacity=0.2)
-rect!(6, find_zero(f, 7), y0, y1, fillcolor="rgb(150,150,150)", opacity=0.2)
+rect!(2.5, 6, y0, y1, line=(color="black",), fillcolor="orange", opacity=0.2)
+x1 = last(x)
+rect!(6, x1, y0, y1, fillcolor="rgb(150,150,150)", opacity=0.2)
 
 delete!(current().layout, :width)  # hide
 delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
-The values returned by `unzip(f,a, b)` are not uniformly chosen, rather where there is more curvature there is more sampling. For illustration purposes, this is emphasized in a few ways: using `quiver!` to add labeled arrows and `rect!` to add rectangular shapes with transparent filling.
+The values returned by `unzip(f, a, b)` are not uniformly chosen, rather where there is more curvature there is more sampling. For illustration purposes, this is emphasized in a few ways: using `quiver!` to add labeled arrows and `rect!` to add rectangular shapes with transparent filling.
 
 
 ### Keyword arguments
 
-The are several keyword arguments used to adjust the defaults for the graphic, for example, `legend=false` and `markersize=10`. Some keyword names utilize `Plots.jl` naming conventions and are translated back to their `Plotly` counterparts. Additional keywords are passed as is so should use the `Plotly` names.
+The are several keyword arguments used to adjust the defaults for the graphic, for example, `legend=false` and `markersize=10`. Some keyword names utilize `Plots.jl` naming conventions and are translated back to their `Plotly` counterparts. Additional keywords are passed as is, so should use the `Plotly` names.
 
 Some keywords chosen to mirror `Plots.jl` are:
 
@@ -198,7 +199,7 @@ Some keywords chosen to mirror `Plots.jl` are:
 | `width`, `height` | new plot calls | set figure size, cf. `size!` |
 | `xlims`, `ylims`  | new plot calls | set figure boundaries, cf `xlims!`, `ylims!`, `extrema` |
 | `legend`          | new plot calls | set or disable legend |
-|`aspect_ratio`     | new plot calls | set to `:equal` for equal `x`-`y` axes |
+|`aspect_ratio`     | new plot calls | set to `:equal` for equal `x`-`y` (and `z`) axes |
 |`label`	    	| `plot`, `plot!`| set with a name for trace in legend |
 |`linecolor`		| `plot`, `plot!`| set with a color |
 |`linewidth`		| `plot`, `plot!`| set with an integer |
@@ -217,7 +218,7 @@ Some keywords chosen to mirror `Plots.jl` are:
 
 As seen in the example there are *many* ways to specify a color. These can be by name (as a string); by name (as a symbol), using HEX colors, using `rgb` (the use above passes a JavaScript command through a string). There are likely more.
 
-One of the `rect!` calls has a `line=(color="black",)` specification. This is a keyword argument from `Plotly`. Shapes have an interior and exterior boundary. The `line` attribute is used to pass in attributes, in this case the line color is black. A *named tuple* is used (which is why the trailing comma is needed for this single element tuple).
+One of the `rect!` calls has a `line=(color="black",)` specification. This is a keyword argument from `Plotly`. Shapes have an interior and exterior boundary. The `line` attribute is used to pass in attributes of the boundary line, in this case the line color is set to black. A `Config` object or *named tuple* is used (which is why the trailing comma is needed for this single-element tuple).
 
 ### Other methods
 
@@ -229,12 +230,6 @@ As seen in this overblown example, there are other methods to plot different thi
 
 * `quiver!` is used to add arrows to a plot. These can optionally have their tails labeled, so this method can be repurposed to add annotations.
 
-* `contour` is used to create contour plots
-
-* `heatmap` is used to create heatmpa plots
-
-* `surface` is used to plot ``3``-dimensional surfaces.
-
 * `rect!` is used to make a rectangle. `Plots.jl` uses `Shape`. See also `circle!`.
 
 * `hline!` `vline!` to draw horizontal or vertical lines across the extent of the plotting region
@@ -244,7 +239,6 @@ Some exported names are used to adjust a plot after construction:
 * `title!`, `xlabel!`, `ylabel!`, `zlabel!`: to adjust title; ``x``-axis label; ``y``-axis label
 * `xlims!`, `ylims!`, `zlims!`: to adjust limits of viewing window
 * `xaxis!`, `yaxis!`, `zaxis!`: to adjust the axis properties
-* `plot` to specify a cell-like layout using a matrix of plots.
 
 !!! note "Subject to change"
     There are some names for keyword arguments that should be changed.
