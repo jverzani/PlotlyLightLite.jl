@@ -98,6 +98,7 @@ export ★, ★!, ziptie, ziptie!
 export parallelogram, parallelogram!, circ3d, circ3d!, skirt, skirt!
 export current
 
+export arrows, arrows!, poly, poly!, band, band!, hspan!, vspan!
 export unzip
 
 end

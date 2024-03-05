@@ -12,12 +12,15 @@ function _merge!(c::Config, d::Config)
     end
 end
 
-
 function _join!(xs, delim="")
     xs′ = filter(!isnothing, xs)
     isempty(xs′) && return nothing
     join(string.(xs′), delim)
 end
+
+# helper
+_adjust_matrix(m::Matrix) = collect(eachrow(m))
+_adjust_matrix(x::Any) = x
 
 # from some.jl
 _something() = nothing
