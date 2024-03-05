@@ -150,7 +150,7 @@ rect!(x0, x1, y0, y1; kwargs...) = rect!(current_plot[], x0, x1, y0, y1; kwargs.
 """
     hspan!([p::Plot], ys, YS; xmin=0.0, ymin=1.0, kwargs...)
 
-Draw horizontal rectanglular rectangle from `ys` to `YS`. By default extends over `x` range of plot `p`, though using `xmin` or `xmax` can adjust that. These are values in `[0,1]` and are interepreted relative to the range returned by `extrema(p).x`.
+Draw horizontal rectanglular rectangle from `ys` to `YS`. By default extends over `x` range of plot `p`, though using `xmin` or `xmax` can adjust that. These are values in `[0,1]` and are interpreted relative to the range returned by `extrema(p).x`.
 """
 hspan!(ys,YS; kwargs...) = hspan!(current_plot[], ys, YS; kwargs...)
 function hspan!(p::Plot, ys, YS; xmin=0.0, xmax=1.0, kwargs...)
@@ -167,7 +167,7 @@ end
 """
     vspan!([p::Plot], xs, XS; ymin=0.0, ymin=1.0, kwargs...)
 
-Draw vertical rectanglular rectangle from `xs` to `XS`. By default extends over `y` range of plot `p`, though using `ymin` or `ymax` can adjust that. These are values in `[0,1]` and are interepreted relative to the range returned by `extrema(p).y`.
+Draw vertical rectanglular rectangle from `xs` to `XS`. By default extends over `y` range of plot `p`, though using `ymin` or `ymax` can adjust that. These are values in `[0,1]` and are interpreted relative to the range returned by `extrema(p).y`.
 
 # Example
 
