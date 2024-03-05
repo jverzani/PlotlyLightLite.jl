@@ -30,6 +30,8 @@ These are used to provide the following shapes
 
 * `skirt!` which forms a surface defined by an underlying path (either the vector `v` anchored at `q` or by values `xs`, `ys`, `zs`) and the paths projection onto the surface of `f(x,y)`
 
+* `band!` is an alternative interface to `ziptie!` (using the verb from `Makie.jl`) for plotting a [ruled surface](https://en.wikipedia.org/wiki/Ruled_surface) between two space curves.
+
 
 # Intersection of 3 planes
 
@@ -113,14 +115,14 @@ delete!(current().layout, :height) # hide
 to_documenter(current())           # hide
 ```
 
-This is  a related spiraling ribbon:
+This is  a related spiraling ribbon using `band`:
 
 ```@example lite
 r(t) = (sin(t), cos(t), t)
 s(t) = (sin(t)/2, cos(t)/2, t)
 ts = range(0, 4pi, length=100)
 
-ziptie(unzip(r.(ts))..., unzip(s.(ts))...;
+band(r.(ts), s.(ts);
        color="seafoam", opacity=.25, showscale=false)
 
 delete!(current().layout, :width)  # hide

@@ -94,6 +94,41 @@ function hline!(p::Plot, y; xmin = 0.0, xmax = 1.0, kwargs...)
     p
 end
 
+"""
+    ablines!([p::Plot], intercept, slope; kwargs...)
+
+Draw line `y = a + bx` over current viewing window, as determined by
+`extrema(p)`.
+"""
+ablines!(intercept, slope; kwargs...) = ablines!(current_plot[], intercept, slope; kwargs...)
+function ablines!(p::Plot, intercept, slope;
+                  linecolor=nothing, linewidth=nothing,
+                  linestyle=nothing,
+                  kwargs...)
+    xa, xb = extrema(p).x
+    ya, yb = extrema(p).y
+
+    _line = (a, b, linecolor, linewidth, linestyle) -> begin
+        if iszero(b)
+            return _shape("line", xa, xb, a, a;
+                          mode = "line",
+                          linecolor, linewidth, linestyle, kwargs...)
+        end
+        # line is a + bx in region [xa, xb] × [ya, yb]
+        l = x -> a + b * x
+        x0 = l(xa) >= ya ? xa : (ya - a)/b
+        x1 = l(xb) <= yb ? xb : (yb - a)/b
+        y0, y1 = extrema((l(x0), l(x1)))
+        _shape("line", x0, x1, y0, y1;
+               mode="line",
+               linecolor, linewidth, linestyle, kwargs...)
+    end
+
+    _add_shapes!(p, _line.(intercept, slope, linecolor, linewidth, linestyle))
+    p
+end
+
+
 
 """
     rect!([p::Plot], x0, x1, y0, y1; kwargs...)
@@ -115,7 +150,7 @@ rect!(x0, x1, y0, y1; kwargs...) = rect!(current_plot[], x0, x1, y0, y1; kwargs.
 """
     hspan!([p::Plot], ys, YS; xmin=0.0, ymin=1.0, kwargs...)
 
-Draw horizontal rectanglular rectangle from `ys` to `YS`. By default extends over `x` range of plot `p`, though using `xmin` or `xmax` can adjust that.
+Draw horizontal rectanglular rectangle from `ys` to `YS`. By default extends over `x` range of plot `p`, though using `xmin` or `xmax` can adjust that. These are values in `[0,1]` and are interepreted relative to the range returned by `extrema(p).x`.
 """
 hspan!(ys,YS; kwargs...) = hspan!(current_plot[], ys, YS; kwargs...)
 function hspan!(p::Plot, ys, YS; xmin=0.0, xmax=1.0, kwargs...)
@@ -132,13 +167,14 @@ end
 """
     vspan!([p::Plot], xs, XS; ymin=0.0, ymin=1.0, kwargs...)
 
-Draw vertical rectanglular rectangle from `xs` to `XS`. By default extends over `y` range of plot `p`, though using `ymin` or `ymax` can adjust that.
+Draw vertical rectanglular rectangle from `xs` to `XS`. By default extends over `y` range of plot `p`, though using `ymin` or `ymax` can adjust that. These are values in `[0,1]` and are interepreted relative to the range returned by `extrema(p).y`.
 
 # Example
 
 ```
 p = plot(x -> x^2, 0, 1; legend=false)
-vspan!(0:.1:0.9, 0.1:0.1:1.0; ymax=[x^2 for x in 0:.1:0.9],
+M = 1 # max of function on `[a,b]`
+vspan!(0:.1:0.9, 0.1:0.1:1.0; ymax=[x^2 for x in 0:.1:0.9]/M,
     fillcolor=:red, opacity=.25)
 ```
 """
@@ -209,3 +245,78 @@ function circle!(p::Plot, x0, x1, y0, y1; kwargs...)
 end
 circle!(x0, x1, y0, y1; kwargs...) =
     circle!(current_plot[], x0, x1, y0, y1; kwargs...)
+
+
+"""
+    band(lower, upper; kwargs...)
+    band(lower::Function, upper::Function, a::Real, b::Real,n=251; kwargs...)
+    band!([p::Plot],lower, upper; kwargs...)
+    band!([p::Plot],lower::Function, upper::Function, a::Real, b::Real,n=251; kwargs...)
+
+Draw band between `lower` and `upper`. These may be specified by functions or by tuples of `x-y-[z]` values.
+
+# Example
+
+Using `(x,y)` points to define the boundaries
+```
+xs = 1:0.2:10
+ys_low = -0.2 .* sin.(xs) .- 0.25
+ys_high = 0.2 .* sin.(xs) .+ 0.25
+
+p = plot(;xlims=(0,10), ylims=(-1.5, .5), legend=false)
+band!(zip(xs, ys_low), zip(xs, ys_high); fillcolor=:blue)
+band!(zip(xs, ys_low .- 1), zip(xs, ys_high .- 1); fillcolor=:red)
+```
+
+Or, using functions to define the boundaries
+
+```
+band(x -> -0.2 * sin(x) - 0.25, x -> 0.2 * sin(x) + 0.25,
+     0, 10;  # a, b, n=251
+     fillcolor=:red, legend=false)
+```
+"""
+function band(lower, upper, args...; kwargs...)
+    p = _new_plot(; kwargs...)
+    band!(p, lower, upper, args...; kwargs...)
+end
+band!(lower::Function, upper::Function, a,b,n=251; kwargs...) =
+    band!(current_plot[], lower, upper, a,b,n; kwargs...)
+band!(lower, upper; kwargs...) =
+    band!(current_plot[], lower, upper; kwargs...)
+
+function band!(p::Plot, lower::Function, upper::Function, a::Real, b::Real, n=251; kwargs...)
+    ts = range(a, b, length=n)
+    ls = lower.(ts)
+    us = upper.(ts)
+    n = length(first(ls))
+    n == 1 && return band!(p, Val(2), zip(ts, ls), zip(ts, us); kwargs...)
+    band!(p, Val(n), ls, us; kwargs...)
+end
+
+function band!(p::Plot, lower, upper; kwargs...)
+    n = length(first(lower))
+    band!(p, Val(n), lower, upper; kwargs...)
+end
+
+# method for 2d band
+function band!(p::Plot, ::Val{2}, lower, upper;
+               fillcolor=nothing,
+               linewidth=nothing,
+               linecolor=:black,
+               linestyle=nothing,
+               kwargs...)
+
+    line=Config()
+    !isnothing(linecolor) && (line.color = linecolor)
+    !isnothing(linewidth) && (line.width = linewidth)
+    !isnothing(linestyle) && (line.style = linestyle)
+
+    x,y = unzip(lower)
+    l1 = Config(;x,y, line, kwargs...)
+    x,y = unzip(upper)
+    fill = "tonexty"
+    l2 = Config(;x,y, fill, fillcolor, line, kwargs...)
+    append!(p.data, (l1, l2))
+    p
+end

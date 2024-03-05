@@ -216,77 +216,7 @@ function skirt!(p::Plot, xs, ys, zs, f::Function; kwargs...)
     ziptie!(p, xs, ys, zs, xs, ys, zs′; kwargs...)
 end
 
-# lower, upper contain points
-"""
-    band(lower, upper; kwargs...)
-    band(lower::Function, upper::Function, a::Real, b::Real,n=251; kwargs...)
-    band!([p::Plot],lower, upper; kwargs...)
-    band!([p::Plot],lower::Function, upper::Function, a::Real, b::Real,n=251; kwargs...)
-
-Draw band between `lower` and `upper`. These may be specified by functions or by tuples of `x-y-[z]` values.
-
-# Example
-
-Using `(x,y)` points to define the boundaries
-```
-xs = 1:0.2:10
-ys_low = -0.2 .* sin.(xs) .- 0.25
-ys_high = 0.2 .* sin.(xs) .+ 0.25
-
-p = plot(;xlims=(0,10), ylims=(-1.5, .5), legend=false)
-band!(zip(xs, ys_low), zip(xs, ys_high); fillcolor=:blue)
-band!(zip(xs, ys_low .- 1), zip(xs, ys_high .- 1); fillcolor=:red)
-```
-
-Or, using functions to define the boundaries
-
-```
-band(x -> -0.2 * sin(x) - 0.25, x -> 0.2 * sin(x) + 0.25, 0, 10;
-     fillcolor=:red, legend=false)
-```
-"""
-function band(lower, upper, args...; kwargs...)
-    p = _new_plot(; kwargs...)
-    band!(p, lower, upper, args...; kwargs...)
-end
-band!(lower, upper, args...; kwargs...) =
-    band!(current_plot[], lower, upper, args...; kwargs...)
-
-function band!(p::Plot, lower::Function, upper::Function, a::Real, b::Real, n=251; kwargs...)
-    ts = range(a, b, length=n)
-    ls = lower.(ts)
-    us = upper.(ts)
-    n = length(first(ls))
-    n == 1 && return band!(p, Val(2), zip(ts, ls), zip(ts, us); kwargs...)
-    band!(p, Val(n), ls, us; kwargs...)
-end
-
-function band!(p::Plot, lower, upper; kwargs...)
-    n = length(first(lower))
-    band!(p, Val(n), lower, upper; kwargs...)
-end
-
+# 3D method for band; dispatch set up in shapes.jl
 function band!(p::Plot, ::Val{3}, lower, upper; kwargs...)
     ziptie!(p, unzip(lower)..., unzip(upper)...; kwargs...)
-end
-
-function band!(p::Plot, ::Val{2}, lower, upper;
-               fillcolor=nothing,
-               linewidth=nothing,
-               linecolor=:black,
-               linestyle=nothing,
-               kwargs...)
-
-    line=Config()
-    !isnothing(linecolor) && (line.color = linecolor)
-    !isnothing(linewidth) && (line.width = linewidth)
-    !isnothing(linestyle) && (line.style = linestyle)
-
-    x,y = unzip(collect(lower))
-    l1 = Config(;x,y, line, kwargs...)
-    x,y = unzip(collect(upper))
-    fill = "tonexty"
-    l2 = Config(;x,y, fill, fillcolor, line, kwargs...)
-    append!(p.data, (l1, l2))
-    p
 end

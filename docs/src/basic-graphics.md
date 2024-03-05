@@ -116,7 +116,7 @@ Unlike `plot` in `Plots.jl`, the `plot` function -- except in this usage and the
 
 ### `scatter(xs, ys, [zs])`
 
-Save for methods, the `plot` method represents the data with type `line` which instructs `Plotly` to connect points with lines.
+Save for a few methods, the `plot` method represents the data with type `line` which instructs `Plotly` to connect points with lines.
 
 Related to `plot` and `plot!` are `scatter` and `scatter!`; which render just the points, without connecting the dots.
 
@@ -139,6 +139,8 @@ The `quiver!` function plots arrows with optional text labels. Due to the underl
 
 The `arrow!` function is not from `Plots.jl`. It provides a different interface to arrow drawing than `quiver`. For `arrow!` the tail and vectors are passed in as vectors. (so for a single arrow from `p=[1,2]` with direction `v=[3,1]` one call would be `arrow!(p, v)` (as compared with `quiver([1],[2], quiver=([3],[1]))`). The latter more efficient for many arrows.
 
+The `arrows!` function borrows the `Makie.jl` interface to specify an arrow (basically `arrows!(x,y,u,v)` is `quiver!(x,y,quiver=(u,v))`.
+
 
 The following `Plots.jl` text attributes are supported:
 
@@ -151,12 +153,20 @@ There is no `Text` function.
 
 ### Shapes
 
-For simple shapes there are `hline!`, `vline!`, `rect!`, and `circle!`.
+There are a few simple shapes, including lines:
 
-* `hline!(y)` draws a horizontal line at elevation `y` across the computed axis The `extrema` function computes the axis sizes.
-* `vline(x)`  draws a vertical line at  `x` across the computed axis. The `extrema` function computes the axis sizes.
-* `rect!(x0, x1, y0, y1)` draws a rectangle between `(x0,y0)` and `(x1,y1)`. The `Plotly`  arguments `fillcolor` and `opacity` can be used to fill the rectangle with color. The `line` argument of `Plotly` can be used to adjust properties of the boundary.
-* `circle!(x0, x1, y0, y1)` draws a "circular" shape in the rectangle given by `(x0, y0)` and `(x1, y1)`. The `Plotly`  arguments `fillcolor` and `opacity` can be used to fill the circle with color. The `line` argument of `Plotly` can be used to adjust properties of the boundary.
+* `hline!(y; xmin=0,xmax=1)` draws a horizontal line at elevation `y` across the computed axis, or adjusted via `xmin` and `xmax`.  The `extrema` function computes the axis sizes.
+* `vline(x)`  draws a vertical line at  `x` across the computed axis, or adjusted via `ymin` and `ymax`. The `extrema` function computes the axis sizes.
+* `ablines!(intercept, slope)` for drawing lines `a + bx` in the current frame.
+
+The following create regions which can be filled.  Shapes have an interior and exterior boundary. The exterior line has attributes that can be adjusted with `linecolor`, `linewidth`, and `linestyle`. The `fillcolor` and `opacity` arguments can adjust the interior color.
+
+* `rect!(x0, x1, y0, y1)` draws a rectangle between `(x0,y0)` and `(x1,y1)`.
+* `hspan!(ys,YS; xmin=0.0, xmax=1.0)` draws horizontal rectangle(s) with bottom and top vertices specified by `ys` and `YS`.
+* `vspan!(xs,XS; ymin=0.0, ymax=1.0)` draws vertical rectangle(s) with left and right vertices specified by `xs` and `XS`.
+* `circle!(x0, x1, y0, y1)` draws a "circular" shape in the rectangle given by `(x0, y0)` and `(x1, y1)`.
+* `poly!(points; kwargs...)` where points is a container of ``(x,y)`` or ``(x,y,z)`` coordinates.
+* `band!(lower, upper, args...; kwargs...)` draws a ribbon or band between `lower` and `upper`. These are either containers of `(x,y)` points or functions, in which case `args...` is read as `a,b,n=251` to specify a range of values to plot over. The function can be scalar valued or parameterizations of a space curve in ``2`` or ``3`` dimensions.
 
 
 ----
@@ -176,7 +186,7 @@ quiver!([2,4.3,6],[10,50,10], ["sparse","concentrated","sparse"],
 # add rectangles to emphasize plot regions
 y0, y1 = extrema(current()).y  # get extent in `y` direction
 rect!(0, 2.5, y0, y1, fillcolor="#d3d3d3", opacity=0.2)
-rect!(2.5, 6, y0, y1, line=(color="black",), fillcolor="orange", opacity=0.2)
+rect!(2.5, 6, y0, y1, linecolor="black", fillcolor="orange", opacity=0.2)
 x1 = last(x)
 rect!(6, x1, y0, y1, fillcolor="rgb(150,150,150)", opacity=0.2)
 
@@ -217,8 +227,6 @@ Some keywords chosen to mirror `Plots.jl` are:
 |`eye`				| new ``3``d plots | set with tuple, see [controls](https://plotly.com/python/3d-camera-controls/) |
 
 As seen in the example there are *many* ways to specify a color. These can be by name (as a string); by name (as a symbol), using HEX colors, using `rgb` (the use above passes a JavaScript command through a string). There are likely more.
-
-One of the `rect!` calls has a `line=(color="black",)` specification. This is a keyword argument from `Plotly`. Shapes have an interior and exterior boundary. The `line` attribute is used to pass in attributes of the boundary line, in this case the line color is set to black. A `Config` object or *named tuple* is used (which is why the trailing comma is needed for this single-element tuple).
 
 ### Other methods
 
