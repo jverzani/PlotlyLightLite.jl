@@ -37,6 +37,8 @@ This package directly implements some of the `Plots` recipes for functions that 
 
 ### `plot(f, a, b)`
 
+The `plot` function from `PlotlyLight` is given several methods through dispatch to create line graphs.
+
 The simplest means to plot a function `f` over the interval `[a,b]` is the declarative pattern `plot(f, a, b)`. For example:
 
 ```@example lite
@@ -60,6 +62,29 @@ For line plots, as created by this usage, the supported key words include
 
 !!! note
     All plotting functions in `PlotlyLightLite` return an instance of `PlotlyLight.Plot`. These objects can be directly modified and re-displayed. The `show` method creates the graphic for viewing. The `current` function returns the last newly created plot.
+
+### `plot(xs, ys)` and `plot(pts)`
+
+The points to plot may be specified directly. Points can be given as ``\{(x_1, y_1), (x_2,y_2), \dots, (x_n, y_n)\}`` or as two vectors ``(x_1, x_2, \dots, x_n)`` and ``(y_1, y_2, \dots, y_n)``. When the latter, they must be of equal length, as internally they are paired off.
+
+For example, we might bypass the automatic selection of points to plot and create these directly:
+
+```@example lite
+xs = range(0, pi, length=251)
+f(x) = sin(sin(x^2))
+ys = f.(xs)
+plot(xs, ys)
+
+g(x) = (x, sin(sin(x^3)))
+plot!(g.(xs))
+
+delete!(current().layout, :width)  # hide
+delete!(current().layout, :height) # hide
+to_documenter(current())           # hide
+```
+
+At times it is more convenient to generate pairs of points. In the above example, `g` returns ``(x,y)`` pairs. Containers of points can be plotted directly, as just shown.
+
 
 
 ### `plot!`
@@ -111,10 +136,10 @@ Arrange an array of plot objects into a regular layout for display.
 
 This basically is the same as `PlotlyLight`'s `Plot` function, but adds a reference so that `current` will point to the new `Plot` object.
 
-Unlike `plot` in `Plots.jl`, the `plot` function -- except in this usage and the previous -- always producesa line plot.
+Unlike `plot` in `Plots.jl`, the `plot` function -- except in this usage and the previous -- always produces a line plot. However, with this usage, `plot.name(kwargs...)` produces a plot with "type" `name`, which can be any of `plotly`'s supported plot types.
 
 
-### `scatter(xs, ys, [zs])`
+### `scatter(xs, ys, [zs])` or `scatter(pts)`
 
 Save for a few methods, the `plot` method represents the data with type `line` which instructs `Plotly` to connect points with lines.
 
@@ -159,7 +184,15 @@ There are a few simple shapes, including lines:
 * `vline(x)`  draws a vertical line at  `x` across the computed axis, or adjusted via `ymin` and `ymax`. The `extrema` function computes the axis sizes.
 * `ablines!(intercept, slope)` for drawing lines `a + bx` in the current frame.
 
-The following create regions which can be filled.  Shapes have an interior and exterior boundary. The exterior line has attributes that can be adjusted with `linecolor`, `linewidth`, and `linestyle`. The `fillcolor` and `opacity` arguments can adjust the interior color.
+The following create regions which can be filled.  Shapes have an interior and exterior boundary. The exterior line has attributes that can be adjusted with `linecolor`, `linewidth`, and `linestyle`.
+
+The following `Plots.jl` fill attributes are supported:
+
+* `fillcolor`
+
+The `plotly` `opacity` argument can adjust the interior color's transparency level.
+
+Plots that create 2d-regions are:
 
 * `rect!(x0, x1, y0, y1)` draws a rectangle between `(x0,y0)` and `(x1,y1)`.
 * `hspan!(ys,YS; xmin=0.0, xmax=1.0)` draws horizontal rectangle(s) with bottom and top vertices specified by `ys` and `YS`.
@@ -197,6 +230,16 @@ to_documenter(current())           # hide
 
 The values returned by `unzip(f, a, b)` are not uniformly chosen, rather where there is more curvature there is more sampling. For illustration purposes, this is emphasized in a few ways: using `quiver!` to add labeled arrows and `rect!` to add rectangular shapes with transparent filling.
 
+As seen in this overblown example, there are other methods besides `plot` for other useful tasks. These include:
+
+* `scatter!` is used to plot points using markers.
+
+* `quiver!` is used to add arrows to a plot. These can optionally have their tails labeled, so this method can be repurposed to add annotations.  The `quiver` command allows for text rotation. Also `arrow` and `arrows` for different interfaces for drawing arrows. The `annotate!` function is used to add annotations at a given point. There are keyword arguments to adjust the text size, color, font-family, etc.
+
+* `rect!` is used to make a rectangle. There are also `hspan!` and `vspan!`. `Plots.jl` uses `Shape`. For lines, there are `hline!` and `vline!` to draw horizontal or vertical lines across the extent of the plotting region. There is also `ablines!` to draw lines specified in intercept-slope form across the extent of the plotting region. Other regions can be draws. For example, `circle!` to draw a circle, and, more generally, `poly` can be used to draw a polygonal region.
+
+
+
 
 ### Keyword arguments
 
@@ -218,6 +261,7 @@ Some keywords chosen to mirror `Plots.jl` are:
 |`markershape`		| `scatter`, `scatter!` | set with `"diamond"`, `"circle"`, ... |
 |`markersize`		| `scatter`, `scatter!` | set with integer |
 |`markercolor`		| `scatter`, `scatter!` | set with color |
+|`fillcolor`        | shapes                | interior color of a 2D shape |
 |`color`			| `annotate!` | set with color |
 |`family`			| `annotate!` | set with string (font family) |
 |`pointsize`		| `annotate!` | set with integer |
@@ -227,20 +271,6 @@ Some keywords chosen to mirror `Plots.jl` are:
 |`eye`				| new ``3``d plots | set with tuple, see [controls](https://plotly.com/python/3d-camera-controls/) |
 
 As seen in the example there are *many* ways to specify a color. These can be by name (as a string); by name (as a symbol), using HEX colors, using `rgb` (the use above passes a JavaScript command through a string). There are likely more.
-
-### Other methods
-
-As seen in this overblown example, there are other methods to plot different things. These include:
-
-* `scatter!` is used to plot points
-
-* `annotate!` is used to add annotations at a given point. There are keyword arguments to adjust the text size, color, font-family, etc.  There is also `quiver` which adds arrows and these arrows may have labels. The `quiver` command allows for text rotation.
-
-* `quiver!` is used to add arrows to a plot. These can optionally have their tails labeled, so this method can be repurposed to add annotations.
-
-* `rect!` is used to make a rectangle. `Plots.jl` uses `Shape`. See also `circle!`.
-
-* `hline!` `vline!` to draw horizontal or vertical lines across the extent of the plotting region
 
 Some exported names are used to adjust a plot after construction:
 

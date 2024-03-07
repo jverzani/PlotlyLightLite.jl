@@ -14,7 +14,7 @@ Parametric plots can be easily created by using a tuple of functions, as in:
 using PlotlyLightLite # load package if not loaded
 using PlotlyDocumenter # hide
 
-version = PlotlyLightLite.PlotlyLight.version[] # hide
+version = PlotlyLightLite.PlotlyLight._version # hide
 PlotlyDocumenter.change_default_plotly_version(version) # hide
 nothing # hide
 ```
@@ -32,7 +32,7 @@ to_documenter(current())           # hide
 
 As with 2-dimensional lines, the arguments `linecolor`, `linewidth`, `linestyle`, and `lineshape` from `Plots` are available.
 
-Using a single function returning a point may be more natural for some usages. Below we use `unzip` to take a container of points into 3 containers for the coordinates, `x`, `y`, `z` to pass to `plot(x,y,z)`:
+Using a single function returning a point may be more natural for some usages. Below we use `unzip` to take a container of points into 3 containers for the coordinates, `x`, `y`, `z` to pass to `plot(x,y,z)` (this could also be just `plot(r.(ts))`. but that interface is not available in `Plots.jl`):
 
 ```@example lite
 r(t) = (sin(t), cos(t), t)
@@ -92,6 +92,8 @@ to_documenter(current())           # hide
 ```
 
 The levels argument can be a range (something with a `step` method, like `-3:3`) or a single number.
+
+
 
 The `linewidth` argument can adjust the width of the contour lines.
 The `contour_labels` argument indicates if the contours should be labeled. The `colorbar` argument indicates if the colorbar scale should be drawn. (The `Plotly` counterpoint is `showscale`.)
@@ -167,7 +169,7 @@ to_documenter(current())           # hide
 ```
 
 
-Parametric surfaces can be produced as follows, where, in this usage, `unzip` creates 3 matrices to pass to `surface`:
+Parametric surfaces can be produced as follows, where, in this usage, `unzip` creates ``3`` matrices to pass to `surface`:
 
 ```@example lite
 r1, r2 = 2, 1/2
@@ -183,7 +185,7 @@ to_documenter(current())           # hide
 ```
 
 
-There isn't much support for arguments from `Plots` implementation, save:
+There isn't much support for arguments from the `Plots.jl` implementation, save:
 
 * `aspect_ratio = :equal` sets the underlying aspect ratio to be equal.
 
