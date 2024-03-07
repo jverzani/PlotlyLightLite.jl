@@ -4,7 +4,7 @@
 using PlotlyLightLite
 using PlotlyDocumenter # hide
 
-version = PlotlyLightLite.PlotlyLight.version[] # hide
+version = PlotlyLightLite.PlotlyLight._version # hide
 PlotlyDocumenter.change_default_plotly_version(version) # hide
 nothing # hide
 ```
@@ -18,7 +18,7 @@ Rather than use the `surface` type, the following use the `mesh3d` type which re
 
 * "star-shaped" surfaces defined by a boundary, described by `xs, ys, zs`, and a point `p` (a vector) with the property that the line segment connecting `p` to a boundary point does not cross any other boundary point. A simple example is a disc with `p` being the origin. The triangulation is easy to visualize, the vertices being the origin and adjacent points on the boundary (which is of course discretized by the data).
 
-* The surface between two space curves defined by selecting $n$ points on each and connecting the points by a line. Paired adjacent points form "rectangles" that are easily triangulated.
+* The surface between two space curves defined by selecting $n$ points on each and connecting the points by a line. Paired adjacent points form "rectangles" that are easily triangulated.  This is an example of a [ruled surface](https://en.wikipedia.org/wiki/Ruled_surface) between two space curves. (A star shape is a ruled surface with one of the curves being just a point.)
 
 The underlying functions have the odd names `★` (i.e., `\bigstar[tab]`) and `ziptie`, along with their `!` counterparts.
 
@@ -30,7 +30,7 @@ These are used to provide the following shapes
 
 * `skirt!` which forms a surface defined by an underlying path (either the vector `v` anchored at `q` or by values `xs`, `ys`, `zs`) and the paths projection onto the surface of `f(x,y)`
 
-* `band!` is an alternative interface to `ziptie!` (using the verb from `Makie.jl`) for plotting a [ruled surface](https://en.wikipedia.org/wiki/Ruled_surface) between two space curves.
+* `band!` is an alternative interface, borrowed from `Makie`, to `ziptie!`
 
 
 # Intersection of 3 planes
